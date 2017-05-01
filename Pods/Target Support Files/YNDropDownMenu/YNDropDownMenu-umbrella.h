@@ -10,7 +10,6 @@
 #endif
 #endif
 
-#import "YNDropDownMenu.h"
 
 FOUNDATION_EXPORT double YNDropDownMenuVersionNumber;
 FOUNDATION_EXPORT const unsigned char YNDropDownMenuVersionString[];
