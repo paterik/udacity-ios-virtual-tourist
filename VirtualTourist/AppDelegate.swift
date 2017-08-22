@@ -12,8 +12,17 @@ import CoreData
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
+    //
+    // MARK: Variables (Intern)
+    //
     var window: UIWindow?
 
+    //
+    // MARK: Variables (Global)
+    //
+    var useCurrentDeviceLocation: Bool = false
+    var useLongitude: Double?
+    var useLatitude: Double?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
