@@ -56,6 +56,7 @@
 				B12BC9FD1F4C7DD10037A359 /* clients */,
 				B12BCA001F4C7E070037A359 /* device */,
 				B12BCA011F4C7E380037A359 /* common */,
+				B12BCA081F4C80CA0037A359 /* data */,
 			);
 			name = model;
 			sourceTree = "<group>";
@@ -100,6 +101,8 @@
 		B12BC9FC1F4C7DA00037A359 /* storyboards */ = {
 			isa = PBXGroup;
 			children = (
+				B140F09A1E9FE94E00EEEEA4 /* Main.storyboard */,
+				B140F0A21E9FE94E00EEEEA4 /* LaunchScreen.storyboard */,
 			);
 			name = storyboards;
 			sourceTree = "<group>";
@@ -184,6 +187,13 @@
 			name = appConfigView;
 			sourceTree = "<group>";
 		};
+		B12BCA081F4C80CA0037A359 /* data */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = data;
+			sourceTree = "<group>";
+		};
 		B140F08A1E9FE94E00EEEEA4 = {
 			isa = PBXGroup;
 			children = (
@@ -211,8 +221,6 @@
 				B12BC9FA1F4C7D460037A359 /* resources */,
 				B140F0961E9FE94E00EEEEA4 /* AppDelegate.swift */,
 				B140F0981E9FE94E00EEEEA4 /* ViewController.swift */,
-				B140F09A1E9FE94E00EEEEA4 /* Main.storyboard */,
-				B140F0A21E9FE94E00EEEEA4 /* LaunchScreen.storyboard */,
 				B140F09D1E9FE94E00EEEEA4 /* VirtualTourist.xcdatamodeld */,
 			);
 			path = VirtualTourist;
