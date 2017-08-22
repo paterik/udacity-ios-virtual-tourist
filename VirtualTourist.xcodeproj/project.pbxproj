@@ -50,6 +50,140 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		B12BC9F71F4C7D210037A359 /* model */ = {
+			isa = PBXGroup;
+			children = (
+				B12BC9FD1F4C7DD10037A359 /* clients */,
+				B12BCA001F4C7E070037A359 /* device */,
+				B12BCA011F4C7E380037A359 /* common */,
+			);
+			name = model;
+			sourceTree = "<group>";
+		};
+		B12BC9F81F4C7D350037A359 /* view */ = {
+			isa = PBXGroup;
+			children = (
+				B12BC9FB1F4C7D980037A359 /* partials */,
+				B12BC9FC1F4C7DA00037A359 /* storyboards */,
+			);
+			name = view;
+			sourceTree = "<group>";
+		};
+		B12BC9F91F4C7D3B0037A359 /* controller */ = {
+			isa = PBXGroup;
+			children = (
+				B12BCA031F4C7E630037A359 /* base */,
+				B12BCA041F4C7E680037A359 /* protocol */,
+				B12BCA051F4C7E720037A359 /* locationMapView */,
+				B12BCA061F4C7E960037A359 /* photoAlbumView */,
+				B12BCA071F4C7E9F0037A359 /* appConfigView */,
+			);
+			name = controller;
+			sourceTree = "<group>";
+		};
+		B12BC9FA1F4C7D460037A359 /* resources */ = {
+			isa = PBXGroup;
+			children = (
+				B140F0A01E9FE94E00EEEEA4 /* Assets.xcassets */,
+				B140F0A51E9FE94E00EEEEA4 /* Info.plist */,
+			);
+			name = resources;
+			sourceTree = "<group>";
+		};
+		B12BC9FB1F4C7D980037A359 /* partials */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = partials;
+			sourceTree = "<group>";
+		};
+		B12BC9FC1F4C7DA00037A359 /* storyboards */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = storyboards;
+			sourceTree = "<group>";
+		};
+		B12BC9FD1F4C7DD10037A359 /* clients */ = {
+			isa = PBXGroup;
+			children = (
+				B12BC9FE1F4C7DD90037A359 /* base */,
+				B12BC9FF1F4C7DDE0037A359 /* flickr.com */,
+			);
+			name = clients;
+			sourceTree = "<group>";
+		};
+		B12BC9FE1F4C7DD90037A359 /* base */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = base;
+			sourceTree = "<group>";
+		};
+		B12BC9FF1F4C7DDE0037A359 /* flickr.com */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = flickr.com;
+			sourceTree = "<group>";
+		};
+		B12BCA001F4C7E070037A359 /* device */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = device;
+			sourceTree = "<group>";
+		};
+		B12BCA011F4C7E380037A359 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				B12BCA021F4C7E4F0037A359 /* extensions */,
+			);
+			name = common;
+			sourceTree = "<group>";
+		};
+		B12BCA021F4C7E4F0037A359 /* extensions */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = extensions;
+			sourceTree = "<group>";
+		};
+		B12BCA031F4C7E630037A359 /* base */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = base;
+			sourceTree = "<group>";
+		};
+		B12BCA041F4C7E680037A359 /* protocol */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = protocol;
+			sourceTree = "<group>";
+		};
+		B12BCA051F4C7E720037A359 /* locationMapView */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = locationMapView;
+			sourceTree = "<group>";
+		};
+		B12BCA061F4C7E960037A359 /* photoAlbumView */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = photoAlbumView;
+			sourceTree = "<group>";
+		};
+		B12BCA071F4C7E9F0037A359 /* appConfigView */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = appConfigView;
+			sourceTree = "<group>";
+		};
 		B140F08A1E9FE94E00EEEEA4 = {
 			isa = PBXGroup;
 			children = (
@@ -71,12 +205,14 @@
 		B140F0951E9FE94E00EEEEA4 /* VirtualTourist */ = {
 			isa = PBXGroup;
 			children = (
+				B12BC9F71F4C7D210037A359 /* model */,
+				B12BC9F81F4C7D350037A359 /* view */,
+				B12BC9F91F4C7D3B0037A359 /* controller */,
+				B12BC9FA1F4C7D460037A359 /* resources */,
 				B140F0961E9FE94E00EEEEA4 /* AppDelegate.swift */,
 				B140F0981E9FE94E00EEEEA4 /* ViewController.swift */,
 				B140F09A1E9FE94E00EEEEA4 /* Main.storyboard */,
-				B140F0A01E9FE94E00EEEEA4 /* Assets.xcassets */,
 				B140F0A21E9FE94E00EEEEA4 /* LaunchScreen.storyboard */,
-				B140F0A51E9FE94E00EEEEA4 /* Info.plist */,
 				B140F09D1E9FE94E00EEEEA4 /* VirtualTourist.xcdatamodeld */,
 			);
 			path = VirtualTourist;
