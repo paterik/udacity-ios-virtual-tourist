@@ -17,10 +17,16 @@ import UIKit
 import MapKit
 import YNDropDownMenu
 
-class MapViewController: BaseController {
+class MapViewController: BaseController, MKMapViewDelegate {
 
+    @IBOutlet weak var mapView: MKMapView!
+    
+    var pinSelected:Pin!
+    var pinLastAdded:Pin? = nil
+    
     override func viewDidLoad() {
         
+        setupMap()
         super.viewDidLoad()
         
     }
@@ -28,6 +34,22 @@ class MapViewController: BaseController {
     override func didReceiveMemoryWarning() {
         
         super.didReceiveMemoryWarning()
+    }
+    
+    func setupMap() {
+    
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.addPin(_:)))
+            longPress.minimumPressDuration = 1.0
+        
+        mapView.addGestureRecognizer(longPress)
+    }
+    
+    func addPin(_ gestureRecognizer: UIGestureRecognizer) {
+        
+        let locationInMap = gestureRecognizer.location(in: mapView)
+        let coordinate:CLLocationCoordinate2D = mapView.convert(locationInMap, toCoordinateFrom: mapView)
+        
+        print (coordinate)
         
     }
 }
