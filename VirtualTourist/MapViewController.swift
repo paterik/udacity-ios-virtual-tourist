@@ -15,16 +15,16 @@ class MapViewController: BaseController, MKMapViewDelegate {
 
     @IBOutlet weak var mapView: MKMapView!
     
-    let mapLongPressDuration = 1.250
+    let mapLongPressDuration = 0.875
     let mapPinIdentifier = "Pin"
     let mapPinImageName = "icnMapPin_v1"
-    
-    // let progressView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 50))
     
     var _pinSelected:Pin!
     var _pinLastAdded:Pin? = nil
     
+    
     var mapViewPin:Pin?
+    var mapViewPins:[Pin]?
     var mapViewRegion:MapRegion?
     var mapViewRegionObjectId:NSManagedObjectID? = nil
     
@@ -38,6 +38,13 @@ class MapViewController: BaseController, MKMapViewDelegate {
     override func didReceiveMemoryWarning() {
         
         super.didReceiveMemoryWarning()
+    }
+    
+    func loadMapAnnotations() {
+    
+        if let mapViewPins = _getAllPins() {
+            mapView.addAnnotations(mapViewPins)
+        }
     }
     
     func loadMapRegion() {
@@ -58,6 +65,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
         
         mapViewRegionObjectId = mapViewRegion!.objectID
         mapView.region = mapViewRegion!.region
+        
     }
     
     func saveMapRegion() {
@@ -114,14 +122,6 @@ class MapViewController: BaseController, MKMapViewDelegate {
         return annotationView
     }
     
-    /*func setProgress(_ progress: CGFloat) {
-        let fullWidth: CGFloat = 200
-        let newWidth = progress/100*fullWidth
-        UIView.animate(withDuration: 1.5) {
-            self.progressView.frame.size = CGSize(width: newWidth, height: self.progressView.frame.height)
-        }
-    }*/
-    
     func mapSetup() {
     
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.mapAddPin(_:)))
@@ -130,11 +130,8 @@ class MapViewController: BaseController, MKMapViewDelegate {
         mapView.addGestureRecognizer(longPress)
         mapView.delegate = self
         
-        // progressView.backgroundColor = .blue
-        // mapView.addSubview(progressView)
-        
-         loadMapRegion()
-        _deleteAllPins() // just for debug_&_dev reasons
+        loadMapRegion()
+        loadMapAnnotations()
     }
     
     func mapAddPin(_ gestureRecognizer: UIGestureRecognizer) {
@@ -172,6 +169,11 @@ class MapViewController: BaseController, MKMapViewDelegate {
             
             default: return
         }
+    }
+    
+    func _getAllPins() -> [Pin]? {
+        
+        return CoreStore.fetchAll(From<Pin>())
     }
     
     func _deleteAllPins() {
