@@ -15,8 +15,16 @@ class MapViewController: BaseController, MKMapViewDelegate {
 
     @IBOutlet weak var mapView: MKMapView!
     
-    var pinSelected:Pin!
-    var pinLastAdded:Pin? = nil
+    let mapLongPressDuration = 1.250
+    let mapPinIdentifier = "Pin"
+    let mapPinImageName = "icnMapPin_v1"
+    
+    // let progressView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 50))
+    
+    var _pinSelected:Pin!
+    var _pinLastAdded:Pin? = nil
+    
+    var mapViewPin:Pin?
     var mapViewRegion:MapRegion?
     var mapViewRegionObjectId:NSManagedObjectID? = nil
     
@@ -24,7 +32,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
         
         super.viewDidLoad()
         
-        setupMap()
+        mapSetup()
     }
 
     override func didReceiveMemoryWarning() {
@@ -46,10 +54,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
             )
             
             mapViewRegion = CoreStore.fetchOne(From<MapRegion>())
-            
-            if appDebugMode == true { print ("--- mapRegionObjectID generated ---") }
-            
-        } else { if appDebugMode == true { print ("--- mapRegionObjectID loaded from persistance layer ---") } }
+        }
         
         mapViewRegionObjectId = mapViewRegion!.objectID
         mapView.region = mapViewRegion!.region
@@ -63,6 +68,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
                 self.mapViewRegion?.region = self.mapView.region
                 
                 return self.mapViewRegion!
+                
             },  success: { (transactionRegion) in
                 
                 self.mapViewRegion = CoreStore.fetchExisting(transactionRegion)!
@@ -73,29 +79,113 @@ class MapViewController: BaseController, MKMapViewDelegate {
         )
     }
     
-    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+    //
+    // MARK: MapView Delegates
+    //
+    
+    func mapView(
+       _ mapView: MKMapView,
+         regionDidChangeAnimated animated: Bool) {
         
         saveMapRegion()
     }
+
+    func mapView(
+       _ mapView: MKMapView,
+         viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        
+        guard !(annotation is MKUserLocation) else { return nil }
+        
+        var annotationView: MKAnnotationView
+            
+        if let dequeuedView = mapView.dequeueReusableAnnotationView(withIdentifier: mapPinIdentifier) {
+            
+            dequeuedView.annotation = annotation
+            annotationView = dequeuedView
+                
+        } else {
+                
+            annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: mapPinIdentifier)
+            annotationView.image = UIImage(named: mapPinImageName)
+            annotationView.canShowCallout = false
+            annotationView.isDraggable = false
+        }
+            
+        return annotationView
+    }
     
-    func setupMap() {
+    /*func setProgress(_ progress: CGFloat) {
+        let fullWidth: CGFloat = 200
+        let newWidth = progress/100*fullWidth
+        UIView.animate(withDuration: 1.5) {
+            self.progressView.frame.size = CGSize(width: newWidth, height: self.progressView.frame.height)
+        }
+    }*/
     
-        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.addPin(_:)))
-            longPress.minimumPressDuration = 1.0
+    func mapSetup() {
+    
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.mapAddPin(_:)))
+            longPress.minimumPressDuration = mapLongPressDuration
         
         mapView.addGestureRecognizer(longPress)
         mapView.delegate = self
         
-        loadMapRegion()
+        // progressView.backgroundColor = .blue
+        // mapView.addSubview(progressView)
+        
+         loadMapRegion()
+        _deleteAllPins() // just for debug_&_dev reasons
     }
     
-    func addPin(_ gestureRecognizer: UIGestureRecognizer) {
+    func mapAddPin(_ gestureRecognizer: UIGestureRecognizer) {
         
         let locationInMap = gestureRecognizer.location(in: mapView)
         let coordinate:CLLocationCoordinate2D = mapView.convert(locationInMap, toCoordinateFrom: mapView)
         
-        print (coordinate)
+        switch gestureRecognizer.state {
+            
+            case UIGestureRecognizerState.began:
+                
+                CoreStore.perform(
+                    
+                    asynchronous: { (transaction) -> Pin in
+                        
+                        self.mapViewPin = transaction.create(Into<Pin>())
+                        self.mapViewPin?.coordinate = coordinate
+                        
+                        return self.mapViewPin!
+                        
+                    },  success: { (transactionPin) in
+                        
+                        self.mapViewPin = CoreStore.fetchExisting(transactionPin)!
+                        self.mapView.addAnnotation(self.mapViewPin!)
+                        
+                        if self.appDebugMode == true { print ("--- mapMapPinObject created successfully ---") }
+                    
+                    },  failure: { (error) in print (error) }
+                    
+                )
+            
+            case UIGestureRecognizerState.ended:
+                let numOfPins = CoreStore.fetchAll(From<Pin>())?.count
+                print ("pin #\(numOfPins!) set successfully done at \(coordinate)")
+            
+            default: return
+        }
+    }
+    
+    func _deleteAllPins() {
         
+        let numOfCurrentPins = CoreStore.fetchAll(From<Pin>())?.count
+        
+        CoreStore.perform(
+            asynchronous: { (transaction) -> Void in
+                transaction.deleteAll(From<Pin>())
+            },
+            completion: { _ in
+                print ("[_DEV_] all \(numOfCurrentPins!) previously saved pins deleted from persitance layer")
+            }
+        )
     }
 }
 
