@@ -18,12 +18,13 @@ class MapViewController: BaseController, MKMapViewDelegate {
     var pinSelected:Pin!
     var pinLastAdded:Pin? = nil
     var mapViewRegion:MapRegion?
+    var mapViewRegionObjectId:NSManagedObjectID? = nil
     
     override func viewDidLoad() {
         
-        setupMap()
         super.viewDidLoad()
         
+        setupMap()
     }
 
     override func didReceiveMemoryWarning() {
@@ -33,31 +34,49 @@ class MapViewController: BaseController, MKMapViewDelegate {
     
     func loadMapRegion() {
     
-        print ("loadMapRegion called ...")
-        
+        mapViewRegion = CoreStore.fetchOne(From<MapRegion>())
         if mapViewRegion == nil {
-            mapViewRegion = MapRegion()
-            mapViewRegion?.region = mapView.region
             
-        } else {
-            mapViewRegion!.region = mapView.region
-        }
-        
-         CoreStore.beginAsynchronous { (transaction) -> Void in
-            
-            let mapRegion = transaction.create(Into(MapRegion))
-            
-            transaction.commit { (result) -> Void in
-                switch result {
-                case .Success(let hasChanges): print("success!")
-                case .Failure(let error): print(error)
+            _ = try? CoreStore.perform(
+                synchronous: { (transaction) in
+                    
+                    mapViewRegion = transaction.create(Into<MapRegion>())
+                    mapViewRegion?.region = mapView.region
                 }
-            }
-        }
+            )
+            
+            mapViewRegion = CoreStore.fetchOne(From<MapRegion>())
+            
+            if appDebugMode == true { print ("--- mapRegionObjectID generated ---") }
+            
+        } else { if appDebugMode == true { print ("--- mapRegionObjectID loaded from persistance layer ---") } }
         
+        mapViewRegionObjectId = mapViewRegion!.objectID
+        mapView.region = mapViewRegion!.region
     }
     
-    func saveMapRegion() {}
+    func saveMapRegion() {
+
+        CoreStore.perform(
+            asynchronous: { (transaction) -> MapRegion in
+                self.mapViewRegion = transaction.fetchExisting(self.mapViewRegionObjectId!)!
+                self.mapViewRegion?.region = self.mapView.region
+                
+                return self.mapViewRegion!
+            },  success: { (transactionRegion) in
+                
+                self.mapViewRegion = CoreStore.fetchExisting(transactionRegion)!
+                self.mapViewRegionObjectId = self.mapViewRegion?.objectID // just to be sure ;)
+                if self.appDebugMode == true { print ("--- mapRegionObjID: \(self.mapViewRegionObjectId!) updated ---") }
+            
+            },  failure: { (error) in print (error) }
+        )
+    }
+    
+    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        
+        saveMapRegion()
+    }
     
     func setupMap() {
     
@@ -65,6 +84,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
             longPress.minimumPressDuration = 1.0
         
         mapView.addGestureRecognizer(longPress)
+        mapView.delegate = self
         
         loadMapRegion()
     }
