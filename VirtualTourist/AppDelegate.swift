@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreData
+import CoreStore
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -25,7 +26,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var useLatitude: Double?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        
+        try! CoreStore.addStorageAndWait(
+            SQLiteStore(
+                fileName: "VirtualTourist.sqlite",
+                configuration: "Default",
+                localStorageOptions: .recreateStoreOnModelMismatch
+            )
+        )
+        
         return true
     }
 
