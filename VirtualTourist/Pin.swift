@@ -15,23 +15,7 @@ class Pin: NSManagedObject, MKAnnotation {
     @NSManaged var latitude: Double
     @NSManaged var longitude: Double
     @NSManaged var numPages: NSNumber?
-    @NSManaged var photos:[Photo]
-    
-    var isDownloading = false
-    
-    override init(entity: NSEntityDescription, insertInto context: NSManagedObjectContext?) {
-        
-        super.init(entity: entity, insertInto: context)
-    }
-    
-    init(coordinate: CLLocationCoordinate2D, context: NSManagedObjectContext) {
-        
-        let entity = NSEntityDescription.entity(forEntityName: "Pin", in: context)!
-        super.init(entity: entity, insertInto: context)
-        
-        self.latitude = coordinate.latitude
-        self.longitude = coordinate.longitude
-    }
+    @NSManaged var photos: [Photo]
     
     var coordinate: CLLocationCoordinate2D {
         
