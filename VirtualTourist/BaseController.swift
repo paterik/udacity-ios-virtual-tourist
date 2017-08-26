@@ -16,7 +16,7 @@ class BaseController: UIViewController {
     // MARK: Constants (Normal)
     //
     
-    let debugMode: Bool = false
+    let appDebugMode: Bool = true
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
     let metaDateTimeFormat = "dd.MM.Y hh:mm"
     
