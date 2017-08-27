@@ -10,7 +10,6 @@ import UIKit
 import CoreData
 import MapKit
 
-@objc
 class Photo: NSManagedObject {
     
     @NSManaged var photoURL: String

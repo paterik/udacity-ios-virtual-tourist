@@ -9,7 +9,6 @@
 import CoreData
 import MapKit
 
-@objc
 class MapRegion: NSManagedObject, MKAnnotation {
     
     @NSManaged var centerLatitude: Double
