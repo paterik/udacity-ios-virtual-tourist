@@ -9,14 +9,15 @@
 import UIKit
 import MapKit
 import CoreData
+import CryptoSwift
 
-@objc
 class Pin: NSManagedObject, MKAnnotation {
     
     @NSManaged var latitude: Double
     @NSManaged var longitude: Double
     @NSManaged var numPages: NSNumber?
     @NSManaged var photos: [Photo]
+    @NSManaged var metaHash: String
     
     var coordinate: CLLocationCoordinate2D {
         
@@ -24,6 +25,7 @@ class Pin: NSManagedObject, MKAnnotation {
         set {
             self.latitude = newValue.latitude
             self.longitude = newValue.longitude
+            self.metaHash = "\(self.latitude)-\(self.longitude)".md5()
         }
     }
 }
