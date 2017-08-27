@@ -35,7 +35,7 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Virtual Tourist" id="7kj-mn-xme">
-                        <barButtonItem key="rightBarButtonItem" id="1jd-wA-smI">
+                        <barButtonItem key="rightBarButtonItem" title="EDIT" id="1jd-wA-smI">
                             <connections>
                                 <action selector="toggleEditMode:" destination="BYZ-38-t0r" id="mlB-fK-GbF"/>
                             </connections>
@@ -44,16 +44,17 @@
                     <connections>
                         <outlet property="btnEditModeItem" destination="1jd-wA-smI" id="Gbc-hL-dgx"/>
                         <outlet property="mapView" destination="eUX-yj-BQh" id="Znv-Dz-tpU"/>
+                        <segue destination="8iK-of-cBi" kind="showDetail" identifier="locationDetail" id="XEm-JV-2ff"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="869.60000000000002" y="36.431784107946029"/>
+            <point key="canvasLocation" x="876" y="38"/>
         </scene>
         <!--PhotoAlbumViewController-->
         <scene sceneID="fcp-0q-wjn">
             <objects>
-                <viewController id="8iK-of-cBi" userLabel="PhotoAlbumViewController" customClass="ViewController" customModule="VirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="8iK-of-cBi" userLabel="PhotoAlbumViewController" customClass="MapDetailViewController" customModule="VirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="tM3-MI-yTw"/>
                         <viewControllerLayoutGuide type="bottom" id="j7L-Tz-Bqk"/>
@@ -62,25 +63,41 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="hello world" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FHj-nE-jr1">
-                                <rect key="frame" x="16" y="320" width="343" height="27"/>
-                                <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="Pq4-40-MSw">
+                                <rect key="frame" x="0.0" y="61" width="375" height="172"/>
+                            </mapView>
+                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0wd-Th-j40">
+                                <rect key="frame" x="0.0" y="17" width="375" height="44"/>
+                                <items>
+                                    <navigationItem title="Virtual Tourist Images" id="4TW-P3-jhZ">
+                                        <barButtonItem key="leftBarButtonItem" title="BACK" id="bMJ-M9-N9I">
+                                            <connections>
+                                                <action selector="btnBackToMapAction:" destination="8iK-of-cBi" id="NIg-AQ-T2B"/>
+                                            </connections>
+                                        </barButtonItem>
+                                    </navigationItem>
+                                </items>
+                            </navigationBar>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="FHj-nE-jr1" firstAttribute="trailing" secondItem="qvG-Hu-zpe" secondAttribute="trailingMargin" id="gSv-J3-cbn"/>
-                            <constraint firstItem="FHj-nE-jr1" firstAttribute="leading" secondItem="qvG-Hu-zpe" secondAttribute="leadingMargin" id="qcf-kd-OG1"/>
-                            <constraint firstItem="FHj-nE-jr1" firstAttribute="top" secondItem="tM3-MI-yTw" secondAttribute="bottom" constant="300" id="sCx-2p-re1"/>
-                            <constraint firstItem="FHj-nE-jr1" firstAttribute="centerY" secondItem="qvG-Hu-zpe" secondAttribute="centerY" id="wLr-Qc-uaX"/>
+                            <constraint firstItem="0wd-Th-j40" firstAttribute="leading" secondItem="qvG-Hu-zpe" secondAttribute="leading" id="8IS-Cn-olG"/>
+                            <constraint firstItem="0wd-Th-j40" firstAttribute="top" secondItem="qvG-Hu-zpe" secondAttribute="topMargin" constant="17" id="BQZ-ZA-CJS"/>
+                            <constraint firstItem="0wd-Th-j40" firstAttribute="leading" secondItem="Pq4-40-MSw" secondAttribute="leading" id="V4x-7o-yFD"/>
+                            <constraint firstItem="Pq4-40-MSw" firstAttribute="top" secondItem="0wd-Th-j40" secondAttribute="bottom" id="WfB-wP-0kQ"/>
+                            <constraint firstItem="0wd-Th-j40" firstAttribute="trailing" secondItem="Pq4-40-MSw" secondAttribute="trailing" id="Wk4-L8-bQh"/>
+                            <constraint firstAttribute="trailing" secondItem="0wd-Th-j40" secondAttribute="trailing" id="Yln-A5-XyT"/>
+                            <constraint firstItem="j7L-Tz-Bqk" firstAttribute="top" secondItem="Pq4-40-MSw" secondAttribute="bottom" constant="434" id="xfY-eV-6Ji"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="btnBackToMapItem" destination="bMJ-M9-N9I" id="Tt7-ic-R0L"/>
+                        <outlet property="miniMapView" destination="Pq4-40-MSw" id="ldH-aR-qj1"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Teq-nC-A2b" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1604" y="35.532233883058474"/>
+            <point key="canvasLocation" x="1696.8" y="36.431784107946029"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="qpQ-Wf-awH">
