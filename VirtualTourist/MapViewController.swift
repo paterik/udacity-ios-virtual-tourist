@@ -13,22 +13,37 @@ import YNDropDownMenu
 
 class MapViewController: BaseController, MKMapViewDelegate {
 
+    //
+    // MARK: IBOutlet Variables
+    //
+    
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var btnEditModeItem: UIBarButtonItem!
+    
+    //
+    // MARK: Class Constants
+    //
     
     let mapLongPressDuration = 0.875
     let mapPinIdentifier = "Pin"
     let mapPinImageName = "icnMapPin_v1"
     
+    //
+    // MARK: Class Variables
+    //
+    
     var _pinSelected:Pin!
     var _pinLastAdded:Pin? = nil
     
-    var editMode:Bool = false
-    
+    var mapEditMode:Bool = false
     var mapViewPin:Pin?
     var mapViewPins:[Pin]?
     var mapViewRegion:MapRegion?
     var mapViewRegionObjectId:NSManagedObjectID? = nil
+    
+    //
+    // MARK: UIViewController Overrides
+    //
     
     override func viewDidLoad() {
         
@@ -42,62 +57,18 @@ class MapViewController: BaseController, MKMapViewDelegate {
         super.didReceiveMemoryWarning()
     }
     
+    //
+    // MARK: IBAction Methods
+    //
+    
     @IBAction func toggleEditMode(_ sender: AnyObject) {
         
-        if editMode {
-            editMode = false
-            btnEditModeItem.title = "Edit"
-        } else {
-            editMode = true
-            btnEditModeItem.title = "Done"
-        }
-    }
-    
-    func loadMapAnnotations() {
-    
-        if let mapViewPins = _getAllPins() {
-            mapView.addAnnotations(mapViewPins)
-        }
-    }
-    
-    func loadMapRegion() {
-    
-        mapViewRegion = CoreStore.fetchOne(From<MapRegion>())
-        if mapViewRegion == nil {
-            
-            _ = try? CoreStore.perform(
-                synchronous: { (transaction) in
-                    
-                    mapViewRegion = transaction.create(Into<MapRegion>())
-                    mapViewRegion?.region = mapView.region
-                }
-            )
-            
-            mapViewRegion = CoreStore.fetchOne(From<MapRegion>())
+        btnEditModeItem.title = "DONE"
+        if mapEditMode {
+            btnEditModeItem.title = "EDIT"
         }
         
-        mapViewRegionObjectId = mapViewRegion!.objectID
-        mapView.region = mapViewRegion!.region
-        
-    }
-    
-    func saveMapRegion() {
-
-        CoreStore.perform(
-            asynchronous: { (transaction) -> MapRegion in
-                self.mapViewRegion = transaction.fetchExisting(self.mapViewRegionObjectId!)!
-                self.mapViewRegion?.region = self.mapView.region
-                
-                return self.mapViewRegion!
-                
-            },  success: { (transactionRegion) in
-                
-                self.mapViewRegion = CoreStore.fetchExisting(transactionRegion)!
-                self.mapViewRegionObjectId = self.mapViewRegion?.objectID // just to be sure ;)
-                if self.appDebugMode == true { print ("--- mapRegionObjID: \(self.mapViewRegionObjectId!) updated ---") }
-                
-            },  failure: { (error) in print (error) }
-        )
+        mapEditMode = !mapEditMode
     }
     
     //
@@ -142,21 +113,25 @@ class MapViewController: BaseController, MKMapViewDelegate {
         let annotation = view.annotation as! Pin
            _pinSelected = annotation
         
-        if !editMode {
-            print ("api call not implemented yet ...")
-            return
+        if !mapEditMode {
+            
+            performSegue(withIdentifier: "locationDetail", sender: self)
+            
+        } else {
+        
+            let alert = UIAlertController(title: "Delete Pin", message: "Do you really want to remove this pin?", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "No, Cancel!", style: .default, handler: nil))
+                alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction) in
+                    self._deletePin(self._pinSelected)
+            }))
+            
+            present(alert, animated: true, completion: nil)
         }
-        
-        let alert = UIAlertController(title: "Delete Pin", message: "Do you really want to remove this pin?", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "No, Cancel!", style: .default, handler: nil))
-            alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction) in
-                self._deletePin(annotation)
-            })
-        )
-        
-        present(alert, animated: true, completion: nil)
     }
-
+    
+    //
+    // MARK: MapView Helper Methods
+    //
     
     func mapSetup() {
     
@@ -165,8 +140,6 @@ class MapViewController: BaseController, MKMapViewDelegate {
         
         mapView.addGestureRecognizer(longPress)
         mapView.delegate = self
-        
-        btnEditModeItem.title = "Edit"
         
         loadMapRegion()
         loadMapAnnotations()
@@ -194,69 +167,39 @@ class MapViewController: BaseController, MKMapViewDelegate {
                         
                         self.mapViewPin = CoreStore.fetchExisting(transactionPin)!
                         self.mapView.addAnnotation(self.mapViewPin!)
+                        self._pinLastAdded = self.mapViewPin!
                         
                         if self.appDebugMode == true { print ("--- mapMapPinObject created successfully ---") }
                     
                     },  failure: { (error) in
-                        self._handlerErrorAsSimpleDialog("Error Add Pin", error.localizedDescription)
+                        self._handleErrorAsSimpleDialog("Error", error.localizedDescription)
                         
                         return
                     }
                 )
             
             case UIGestureRecognizerState.ended:
-                let numOfPins = CoreStore.fetchAll(From<Pin>())?.count
-                if self.appDebugMode == true { print ("pin #\(numOfPins!) set successfully done at \(coordinate)") }
+                
+                if self.appDebugMode == true {
+                    let numOfPins = CoreStore.fetchAll(From<Pin>())?.count
+                    print ("pin #\(numOfPins!) set successfully done at \(coordinate)")
+                }
             
             default: return
         }
     }
     
-    func _getAllPins() -> [Pin]? {
+    //
+    // MARK: Segue/Navigation
+    //
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
-        return CoreStore.fetchAll(From<Pin>())
-    }
-
-    func _deletePin (_ targetPin: Pin!)  {
-    
-        CoreStore.perform(
-            asynchronous: { (transaction) -> Void in
-                transaction.deleteAll(
-                    From<Pin>(),
-                    Where("metaHash", isEqualTo: targetPin.metaHash)
-                )
-            },
-            success: { _ in
-                self.mapView.removeAnnotation(targetPin)
-                self._pinSelected = nil
-                if self.appDebugMode == true {
-                    print ("[_DEV_] \(targetPin.coordinate) deleted from persistance layer!")
-                }
-                
-            },
-            failure: { (error) in
-                self._handlerErrorAsSimpleDialog("Error Deleting Single Pin", error.localizedDescription)
-                return
-            }
-        )
-    }
-    
-    func _deleteAllPins() {
-        
-        let numOfCurrentPins = CoreStore.fetchAll(From<Pin>())?.count
-        
-        CoreStore.perform(
-            asynchronous: { (transaction) -> Void in
-                transaction.deleteAll(From<Pin>())
-            },
-            completion: { _ in
-                
-                self.mapView.removeAnnotations(self.mapView.annotations)
-                if self.appDebugMode == true {
-                    print ("[_DEV_] all \(numOfCurrentPins!) previously saved pins deleted from persitance layer")
-                }
-            }
-        )
+        if segue.identifier == "locationDetail" {
+            
+            mapView.deselectAnnotation(_pinSelected, animated: false)
+            let controller = segue.destination as! MapDetailViewController
+                controller.pin = _pinSelected
+        }
     }
 }
 
