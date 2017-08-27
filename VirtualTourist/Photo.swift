@@ -15,20 +15,6 @@ class Photo: NSManagedObject {
     @NSManaged var imagePath: String?
     @NSManaged var pin: Pin
     
-    override init(entity: NSEntityDescription, insertInto context: NSManagedObjectContext?) {
-        
-        super.init(entity: entity, insertInto: context)
-    }
-    
-    init(photoURL: String, pin: Pin, context: NSManagedObjectContext) {
-        
-        let entity = NSEntityDescription.entity(forEntityName: "Photo", in: context)!
-        super.init(entity: entity, insertInto: context)
-        
-        self.photoURL = photoURL
-        self.pin = pin
-    }
-    
     var image: UIImage? {
         
         if imagePath != nil {
