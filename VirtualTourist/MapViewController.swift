@@ -95,7 +95,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
                 self.mapViewRegion = CoreStore.fetchExisting(transactionRegion)!
                 self.mapViewRegionObjectId = self.mapViewRegion?.objectID // just to be sure ;)
                 if self.appDebugMode == true { print ("--- mapRegionObjID: \(self.mapViewRegionObjectId!) updated ---") }
-            
+                
             },  failure: { (error) in print (error) }
         )
     }
@@ -147,23 +147,10 @@ class MapViewController: BaseController, MKMapViewDelegate {
             return
         }
         
-        print ("*** \(_pinSelected.objectID)")
-        print ("*** \(annotation.objectID)")
-        print ("--- --------------------------------------------------------------------------------------------------")
-        
         let alert = UIAlertController(title: "Delete Pin", message: "Do you really want to remove this pin?", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "No, Cancel!", style: .default, handler: nil))
             alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction) in
-                //self._deletePin(annotation)
-                
-                _ = try? CoreStore.perform(
-                    synchronous: { (transaction) in
-                        
-                        transaction.delete(self._pinSelected)
-                        self.mapView.removeAnnotation(self._pinSelected)
-                        self._pinSelected = nil
-                })
-                
+                self._deletePin(self._pinSelected!)
             })
         )
         
@@ -232,19 +219,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
 
     func _deletePin (_ targetPin: Pin!)  {
     
-        
-        print ("*** \(targetPin.objectID)")
-        print ("--- --------------------------------------------------------------------------------------------------")
-
-        _ = try? CoreStore.perform(
-            synchronous: { (transaction) in
-                
-                transaction.delete(targetPin)
-                self.mapView.removeAnnotation(targetPin)
-                self._pinSelected = nil
-        })
-        
-        /*CoreStore.perform(
+        CoreStore.perform(
             asynchronous: { (transaction) -> Void in
                 transaction.delete(targetPin)
             },
@@ -260,7 +235,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
                 self._handlerErrorAsSimpleDialog("Error Deleting Single Pin", error.localizedDescription)
                 return
             }
-        )*/
+        )
     }
     
     func _deleteAllPins() {
