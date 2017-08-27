@@ -150,7 +150,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
         let alert = UIAlertController(title: "Delete Pin", message: "Do you really want to remove this pin?", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "No, Cancel!", style: .default, handler: nil))
             alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction) in
-                self._deletePin(self._pinSelected!)
+                self._deletePin(annotation)
             })
         )
         
@@ -221,7 +221,10 @@ class MapViewController: BaseController, MKMapViewDelegate {
     
         CoreStore.perform(
             asynchronous: { (transaction) -> Void in
-                transaction.delete(targetPin)
+                transaction.deleteAll(
+                    From<Pin>(),
+                    Where("metaHash", isEqualTo: targetPin.metaHash)
+                )
             },
             success: { _ in
                 self.mapView.removeAnnotation(targetPin)
@@ -247,6 +250,8 @@ class MapViewController: BaseController, MKMapViewDelegate {
                 transaction.deleteAll(From<Pin>())
             },
             completion: { _ in
+                
+                self.mapView.removeAnnotations(self.mapView.annotations)
                 if self.appDebugMode == true {
                     print ("[_DEV_] all \(numOfCurrentPins!) previously saved pins deleted from persitance layer")
                 }
