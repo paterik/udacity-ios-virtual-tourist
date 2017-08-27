@@ -26,7 +26,7 @@ class BaseController: UIViewController {
     
     var appMenu: YNDropDownMenu?
     
-    func _handlerErrorAsSimpleDialog(_ errorTitle: String, _ errorMessage: String) {
+    func _handleErrorAsSimpleDialog(_ errorTitle: String, _ errorMessage: String) {
     
         let alert = UIAlertController(title: errorTitle, message: errorMessage, preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "dismiss", style: .default, handler: nil))
