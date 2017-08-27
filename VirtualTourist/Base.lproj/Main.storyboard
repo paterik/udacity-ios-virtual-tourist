@@ -28,14 +28,21 @@
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="eUX-yj-BQh" firstAttribute="bottom" secondItem="wfy-db-euE" secondAttribute="top" id="Mzy-h4-dwf"/>
-                            <constraint firstItem="eUX-yj-BQh" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="etp-Ne-NY0"/>
-                            <constraint firstItem="eUX-yj-BQh" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="qrl-oF-CaE"/>
-                            <constraint firstAttribute="trailing" secondItem="eUX-yj-BQh" secondAttribute="trailing" id="tLg-0e-gZ1"/>
+                            <constraint firstItem="eUX-yj-BQh" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="A0L-42-4N3"/>
+                            <constraint firstItem="eUX-yj-BQh" firstAttribute="bottom" secondItem="wfy-db-euE" secondAttribute="top" id="fTk-FP-xK8"/>
+                            <constraint firstItem="eUX-yj-BQh" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="fxF-kg-2Xq"/>
+                            <constraint firstAttribute="trailing" secondItem="eUX-yj-BQh" secondAttribute="trailing" id="ni8-nO-nSz"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Virtual Tourist" id="7kj-mn-xme"/>
+                    <navigationItem key="navigationItem" title="Virtual Tourist" id="7kj-mn-xme">
+                        <barButtonItem key="rightBarButtonItem" id="1jd-wA-smI">
+                            <connections>
+                                <action selector="toggleEditMode:" destination="BYZ-38-t0r" id="mlB-fK-GbF"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
+                        <outlet property="btnEditModeItem" destination="1jd-wA-smI" id="Gbc-hL-dgx"/>
                         <outlet property="mapView" destination="eUX-yj-BQh" id="Znv-Dz-tpU"/>
                     </connections>
                 </viewController>
