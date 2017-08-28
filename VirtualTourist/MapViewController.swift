@@ -10,6 +10,7 @@ import UIKit
 import MapKit
 import CoreStore
 import YNDropDownMenu
+import SnapKit
 
 class MapViewController: BaseController, MKMapViewDelegate {
 
@@ -27,6 +28,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
     let mapLongPressDuration = 0.875
     let mapPinIdentifier = "Pin"
     let mapPinImageName = "icnMapPin_v1"
+    let mapEditModeInfoLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
     
     //
     // MARK: Class Variables
@@ -63,10 +65,13 @@ class MapViewController: BaseController, MKMapViewDelegate {
     
     @IBAction func toggleEditMode(_ sender: AnyObject) {
         
-        btnEditModeItem.title = "DONE"
-        if mapEditMode {
-            btnEditModeItem.title = "EDIT"
+        btnEditModeItem.title = "EDIT"
+        if !mapEditMode {
+            btnEditModeItem.title = "DONE"
         }
+        
+        mapEditModeInfoLabel.isEnabled = !mapEditMode
+        mapEditModeInfoLabel.isHidden = mapEditMode
         
         mapEditMode = !mapEditMode
     }
@@ -143,6 +148,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
         
         loadMapRegion()
         loadMapAnnotations()
+        loadMapAdditions()
     }
     
     func mapAddPin(_ gestureRecognizer: UIGestureRecognizer) {
@@ -192,6 +198,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
     //
     // MARK: Segue/Navigation
     //
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
         if segue.identifier == "locationDetail" {

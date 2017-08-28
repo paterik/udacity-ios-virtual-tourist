@@ -60,6 +60,25 @@ extension MapViewController {
         }
     }
     
+    func loadMapAdditions() {
+        
+        mapEditModeInfoLabel.backgroundColor = UIColor(netHex: 0xEC2C61)
+        mapEditModeInfoLabel.textColor = UIColor(netHex: 0xFFFFFF)
+        mapEditModeInfoLabel.textAlignment = .center
+        mapEditModeInfoLabel.text = "Now Tap Pins to Delete"
+        mapEditModeInfoLabel.isEnabled = false
+        mapEditModeInfoLabel.isHidden = true
+        
+        view.addSubview(mapEditModeInfoLabel)
+        
+        mapEditModeInfoLabel.snp.makeConstraints { (make) -> Void in
+            make.height.equalTo(50)
+            make.width.equalTo(self.view)
+            make.bottom.equalTo(bottomLayoutGuide.snp.top)
+        }
+        
+    }
+    
     func _getAllPins() -> [Pin]? {
         
         return CoreStore.fetchAll(From<Pin>())
