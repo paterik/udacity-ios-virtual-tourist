@@ -12,6 +12,7 @@ def baseLibs
     pod 'CryptoSwift'
     pod 'YNDropDownMenu'
     pod 'Kingfisher', '~> 3.0'
+    pod 'SnapKit', '~> 3.2.0'
 end
 
 target 'VirtualTourist' do
