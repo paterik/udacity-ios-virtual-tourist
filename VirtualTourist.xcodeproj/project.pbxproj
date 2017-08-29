@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		B11C2F091F544BE900F69F6E /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B11C2F081F544BE900F69F6E /* UIColor.swift */; };
+		B11C2F0B1F55F0DD00F69F6E /* RequestClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B11C2F0A1F55F0DD00F69F6E /* RequestClient.swift */; };
 		B12BCA0A1F4C88130037A359 /* BaseController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B12BCA091F4C88130037A359 /* BaseController.swift */; };
 		B140F0971E9FE94E00EEEEA4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B140F0961E9FE94E00EEEEA4 /* AppDelegate.swift */; };
 		B140F0991E9FE94E00EEEEA4 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B140F0981E9FE94E00EEEEA4 /* MapViewController.swift */; };
@@ -27,6 +28,7 @@
 		461A4D22E43FEB594A4BE36E /* Pods_VirtualTourist.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_VirtualTourist.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACE6EE8AE16FDEF3E5224A79 /* Pods-VirtualTourist.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VirtualTourist.debug.xcconfig"; path = "Pods/Target Support Files/Pods-VirtualTourist/Pods-VirtualTourist.debug.xcconfig"; sourceTree = "<group>"; };
 		B11C2F081F544BE900F69F6E /* UIColor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
+		B11C2F0A1F55F0DD00F69F6E /* RequestClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestClient.swift; sourceTree = "<group>"; };
 		B12BCA091F4C88130037A359 /* BaseController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseController.swift; sourceTree = "<group>"; };
 		B140F0931E9FE94E00EEEEA4 /* VirtualTourist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VirtualTourist.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B140F0961E9FE94E00EEEEA4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -140,6 +142,7 @@
 		B12BC9FE1F4C7DD90037A359 /* base */ = {
 			isa = PBXGroup;
 			children = (
+				B11C2F0A1F55F0DD00F69F6E /* RequestClient.swift */,
 			);
 			name = base;
 			sourceTree = "<group>";
@@ -428,6 +431,7 @@
 				B1AC4CE41F52F8730032C590 /* MapDetailViewController.swift in Sources */,
 				B140F0971E9FE94E00EEEEA4 /* AppDelegate.swift in Sources */,
 				B12BCA0A1F4C88130037A359 /* BaseController.swift in Sources */,
+				B11C2F0B1F55F0DD00F69F6E /* RequestClient.swift in Sources */,
 				B140F09F1E9FE94E00EEEEA4 /* VirtualTourist.xcdatamodeld in Sources */,
 				B11C2F091F544BE900F69F6E /* UIColor.swift in Sources */,
 			);
