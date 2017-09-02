@@ -5,6 +5,7 @@ use_frameworks!
 
 def dataLibs
     pod 'CoreStore', '~> 4.0'
+    pod 'ObjectMapper', '~> 2.2'
 end
 
 def baseLibs
