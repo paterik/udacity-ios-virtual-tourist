@@ -26,6 +26,8 @@ class MapDetailViewController: BaseController, MKMapViewDelegate {
     let mapPinIdentifier = "MiniMapPin"
     let mapPinImageName = "icnMapPin_v1"
     
+    let flickrClient = FlickrClient.sharedInstance
+    
     //
     // MARK: Class Variables
     //
@@ -41,6 +43,21 @@ class MapDetailViewController: BaseController, MKMapViewDelegate {
         super.viewDidLoad()
         
         mapSetup()
+        
+        flickrClient.getSampleImages (pin) {
+            
+            (success, error) in
+            
+            if success == true {
+                
+                print ("!!! fine !!!")
+                
+            } else {
+                
+                print ("not_so_good :(")
+                print (error?.description ?? "unkown error")
+            }
+        }
     }
     
     override func didReceiveMemoryWarning() {
