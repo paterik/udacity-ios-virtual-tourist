@@ -75,10 +75,11 @@ class RequestClient {
     func requestPrepare (
        _ url: String,
        _ method: String,
-         headers: [String : String],
-         jsonDataBody: [String : AnyObject]?) -> URLRequest {
+       _ headers: [String : String],
+       _ jsonDataParams: [String : AnyObject]?,
+       _ jsonDataBody: [String : AnyObject]?) -> URLRequest {
         
-        let request = NSMutableURLRequest(url: URL(string: url)!)
+        var request = NSMutableURLRequest(url: URL(string: url)!)
         
         request.addValue("UTF-8", forHTTPHeaderField: "Accept-Charset")
         request.addValue("no-cache", forHTTPHeaderField: "Cache-Control")
@@ -95,6 +96,19 @@ class RequestClient {
             for (key, value) in headers {
                 request.addValue(value, forHTTPHeaderField: key)
             }
+        }
+        
+        // get parameter dictionary data not empty? Handle this data as http get parametric data
+        if !(jsonDataParams?.values.isEmpty)! {
+            
+            let parameterString = jsonDataParams!.stringFromHttpParameters()
+            let requestURL = URL(string:"\(url)?\(parameterString)")!
+            
+            if (debugMode) {
+                print (requestURL)
+            }
+            
+            request = URLRequest(url: requestURL) as! NSMutableURLRequest
         }
         
         // body dictionary data not empty? Handle this data as json-compatible type
