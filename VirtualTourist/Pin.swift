@@ -15,9 +15,9 @@ class Pin: NSManagedObject, MKAnnotation {
     
     @NSManaged var latitude: Double
     @NSManaged var longitude: Double
-    @NSManaged var numPages: NSNumber?
     @NSManaged var photos: [Photo]
     @NSManaged var metaHash: String
+    @NSManaged var metaNumOfPages: NSNumber?
     
     var coordinate: CLLocationCoordinate2D {
         
