@@ -23,6 +23,8 @@ class FlickrClient: NSObject {
     let debugMode: Bool = true
     let session = URLSession.shared
     let client = RequestClient.sharedInstance
+    let maxAllowedPages = 2500
+    let maxPhotesEachPage = 20
     
     //
     // MARK: Constants (API)
@@ -67,6 +69,20 @@ class FlickrClient: NSObject {
         static let _lonMax = 180.0
     }
     
+    func getRandomPageFromPersistedPin(_ targetPin: Pin) -> UInt32 {
+    
+        if  let numOfPages = targetPin.metaNumOfPages {
+            let maxNumOfPages = Int((Double(maxAllowedPages) / Double(maxPhotesEachPage)).rounded())
+            
+            var numPagesInt = numOfPages as! Int
+                numPagesInt = (numPagesInt > maxNumOfPages) ? maxNumOfPages : numPagesInt
+            
+            return UInt32((arc4random_uniform(UInt32(numPagesInt))))
+        }
+        
+        return 1
+    }
+    
     func getSampleImages (
        _ targetPin: Pin,
        _ completionHandlerForSampleImages: @escaping (_ success: Bool?, _ error: String?) -> Void) {
@@ -95,13 +111,30 @@ class FlickrClient: NSObject {
             
             if (error != nil) {
                 
-                completionHandlerForSampleImages(
-                    false, "Oops! Your request could not be handled: \(String(describing: error!))"
-                )
+                completionHandlerForSampleImages(false, "Oops! Your request could not be handled: \(String(describing: error!))")
                 
             } else {
             
-                print (data!)
+                // try to handle json result by binding specific keys (photos, photo and pages)
+                if  let photoResultDictionary = data?.value(forKey: "photos") as? [String: AnyObject],
+                    let photoResultArray = photoResultDictionary["photo"] as? [[String: AnyObject]],
+                    let numOfPages = photoResultDictionary["pages"] as? UInt32 {
+                    
+                    DispatchQueue.main.async(execute: {
+                        
+                        targetPin.metaNumOfPages = NSNumber(value: numOfPages)
+                        
+                        for photoDictionary in photoResultArray {
+                            
+                            let photoURL = photoDictionary["url_m"] as! String
+                            
+                            print (photoURL)
+                            print ("---")
+                            // let photo = Photo(photoURL: photoURLString, pin: targetPin, context: self.sharedContext)
+                        }
+                    })
+                    
+                }
                 
                 completionHandlerForSampleImages(true, nil)
             }
