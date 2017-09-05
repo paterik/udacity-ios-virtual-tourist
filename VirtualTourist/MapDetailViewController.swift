@@ -25,14 +25,13 @@ class MapDetailViewController: BaseController, MKMapViewDelegate {
     
     let mapPinIdentifier = "MiniMapPin"
     let mapPinImageName = "icnMapPin_v1"
-    
     let flickrClient = FlickrClient.sharedInstance
     
     //
     // MARK: Class Variables
     //
     
-    var pin:Pin!
+    var pin: Pin!
  
     //
     // MARK: UIViewController Overrides
@@ -44,17 +43,16 @@ class MapDetailViewController: BaseController, MKMapViewDelegate {
         
         mapSetup()
         
+        //
+        // just for development reasons, start downloading new images on each viewClass load
+        //
+        
         flickrClient.getSampleImages (pin) {
             
             (success, error) in
             
-            if success == true {
-                
-                print ("!!! fine !!!")
-                
-            } else {
-                
-                print ("not_so_good :(")
+            if success == false {
+                print ("something bad happened :(")
                 print (error?.description ?? "unkown error")
             }
         }
@@ -109,13 +107,12 @@ class MapDetailViewController: BaseController, MKMapViewDelegate {
     
     func mapSetup() {
         
-        // @todo (v1.0.5): move this as property pack deep inside the corresponding PIN entity
+        // @todo (v1.0.n): move this as property pack deep inside the corresponding PIN entity
         let pinCenter = CLLocationCoordinate2D(latitude: pin.coordinate.latitude, longitude: pin.coordinate.longitude)
         let pinRegion = MKCoordinateRegion(center: pinCenter, span: MKCoordinateSpan(latitudeDelta: 0.375, longitudeDelta: 0.375))
 
         miniMapView.delegate = self
         miniMapView.setRegion(pinRegion, animated: true)
         miniMapView.addAnnotation(pin)
-        
     }
 }
