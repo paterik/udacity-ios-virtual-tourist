@@ -25,6 +25,7 @@
 		B1AF26F11F5AC162006B94CC /* FlickrClientExention.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1AF26F01F5AC162006B94CC /* FlickrClientExention.swift */; };
 		B1AF26F31F5AC83C006B94CC /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1AF26F21F5AC83C006B94CC /* String.swift */; };
 		B1AF26F51F5AC86B006B94CC /* Dictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1AF26F41F5AC86B006B94CC /* Dictionary.swift */; };
+		B1AF26F71F5F016C006B94CC /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1AF26F61F5F016C006B94CC /* UIImage.swift */; };
 		B1F8D19F1F4F2DB20025D575 /* Pin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1F8D19E1F4F2DB20025D575 /* Pin.swift */; };
 		B1F8D1A11F4F2DD50025D575 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1F8D1A01F4F2DD50025D575 /* Photo.swift */; };
 		BFDEA9AB5FACA533086E1E43 /* Pods_VirtualTourist.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 461A4D22E43FEB594A4BE36E /* Pods_VirtualTourist.framework */; };
@@ -53,6 +54,7 @@
 		B1AF26F01F5AC162006B94CC /* FlickrClientExention.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlickrClientExention.swift; sourceTree = "<group>"; };
 		B1AF26F21F5AC83C006B94CC /* String.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		B1AF26F41F5AC86B006B94CC /* Dictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dictionary.swift; sourceTree = "<group>"; };
+		B1AF26F61F5F016C006B94CC /* UIImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
 		B1F8D19E1F4F2DB20025D575 /* Pin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pin.swift; sourceTree = "<group>"; };
 		B1F8D1A01F4F2DD50025D575 /* Photo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 		BA75860029CA1A46FF04052C /* Pods-VirtualTourist.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VirtualTourist.release.xcconfig"; path = "Pods/Target Support Files/Pods-VirtualTourist/Pods-VirtualTourist.release.xcconfig"; sourceTree = "<group>"; };
@@ -191,6 +193,7 @@
 				B11C2F081F544BE900F69F6E /* UIColor.swift */,
 				B1AF26F21F5AC83C006B94CC /* String.swift */,
 				B1AF26F41F5AC86B006B94CC /* Dictionary.swift */,
+				B1AF26F61F5F016C006B94CC /* UIImage.swift */,
 			);
 			name = extensions;
 			sourceTree = "<group>";
@@ -474,6 +477,7 @@
 				B11C2F0B1F55F0DD00F69F6E /* RequestClient.swift in Sources */,
 				B140F09F1E9FE94E00EEEEA4 /* VirtualTourist.xcdatamodeld in Sources */,
 				B1AF26F51F5AC86B006B94CC /* Dictionary.swift in Sources */,
+				B1AF26F71F5F016C006B94CC /* UIImage.swift in Sources */,
 				B1AF26F31F5AC83C006B94CC /* String.swift in Sources */,
 				B11C2F091F544BE900F69F6E /* UIColor.swift in Sources */,
 			);
