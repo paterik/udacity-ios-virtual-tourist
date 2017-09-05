@@ -7,6 +7,9 @@
 //
 
 import Foundation
+import Kingfisher
+import CoreStore
+import CryptoSwift
 
 class FlickrClient: NSObject {
     
@@ -25,6 +28,9 @@ class FlickrClient: NSObject {
     let client = RequestClient.sharedInstance
     let maxAllowedPages = 2500
     let maxPhotesEachPage = 20
+    let maxDownloadTimeout = 30.0
+    
+    var photo:Photo?
     
     //
     // MARK: Constants (API)
@@ -61,6 +67,7 @@ class FlickrClient: NSObject {
     }
     
     struct apiSearchBBoxParams {
+        
         static let _bbHalfWidth = 1.0
         static let _bbHalfHeight = 1.0
         static let _latMin = -90.0
@@ -69,6 +76,26 @@ class FlickrClient: NSObject {
         static let _lonMax = 180.0
     }
     
+    func getDownloadedImageForPhotoUrl(
+       _ imageUrl: String,
+       _ completionHandlerForDowloadedImage: @escaping (_ rawImage: UIImage?, _ success: Bool?, _ error: String?) -> Void) {
+    
+        ImageDownloader.default.downloadTimeout = maxDownloadTimeout
+        ImageDownloader.default.downloadImage(with: URL(string: imageUrl)!, options: [], progressBlock: nil)
+        {
+            (rawImage, error, url, data) in
+            
+            if (error != nil) {
+                
+                completionHandlerForDowloadedImage(nil, false, "\(String(describing: error!))")
+                
+            } else {
+                
+                completionHandlerForDowloadedImage(rawImage, true, nil)
+            }
+        }
+    }
+
     func getSampleImages (
        _ targetPin: Pin,
        _ completionHandlerForSampleImages: @escaping (_ success: Bool?, _ error: String?) -> Void) {
@@ -98,7 +125,7 @@ class FlickrClient: NSObject {
             
             if (error != nil) {
                 
-                completionHandlerForSampleImages(false, "Oops! Your request could not be handled: \(String(describing: error!))")
+                completionHandlerForSampleImages(false, "Oops! Request could not be handled: \(String(describing: error!))")
                 
             } else {
             
@@ -109,21 +136,60 @@ class FlickrClient: NSObject {
                     
                     DispatchQueue.main.async(execute: {
                         
-                        targetPin.metaNumOfPages = NSNumber(value: numOfPages)
-                        
                         for photoDictionary in photoResultArray {
+                        
+                            let imageUrl = photoDictionary["url_m"] as! String
                             
-                            let photoURL = photoDictionary["url_m"] as! String
-                            
-                            print (photoURL)
-                            print ("---")
-                            
+                            self.getDownloadedImageForPhotoUrl(imageUrl) { (rawImage, success, error) in
+                        
+                                if (error != nil) {
+                                    completionHandlerForSampleImages(false, error)
+                                
+                                } else {
+                                    
+                                    // prepare origin image
+                                    guard let imageOrigin = UIImageJPEGRepresentation(rawImage!, 1) else {
+                                        completionHandlerForSampleImages(false, error); return
+                                    }
+                                    
+                                    // prepare thumpnail version of primary image
+                                    guard let imagePreview = UIImageJPEGRepresentation(rawImage!.resized(withPercentage: 0.5)!, 0.65) else {
+                                        completionHandlerForSampleImages(false, error); return
+                                    }
+                                    
+                                    CoreStore.perform(
+                                        
+                                        asynchronous: { (transaction) -> Photo in
+                                            
+                                            self.photo = transaction.create(Into<Photo>())
+                                            self.photo!.imageSourceURL = imageUrl
+                                            self.photo!.imageHash = imageUrl.md5()
+                                            self.photo!.imageRaw = imageOrigin
+                                            self.photo!.imagePreview = imagePreview
+                                            self.photo!.pin = targetPin
+                                            
+                                            return self.photo!
+                                            
+                                        },  success: { (transactionPhoto) in
+                                        
+                                            self.photo = CoreStore.fetchExisting(transactionPhoto)!
+                                            if self.debugMode == true {
+                                                print ("imageOrigin=\(imageOrigin), imagePreview=\(imagePreview)")
+                                                print ("--- photo object created successfully ---")
+                                            }
+                                        
+                                        },  failure: { (error) in
+                                        
+                                            if self.debugMode == true { print ("--- photo object creation failed ---") }
+                                        
+                                            return
+                                        }
+                                    )
+                                }
+                            }
                         }
                     })
-                    
                 }
-                
-                completionHandlerForSampleImages(true, nil)
             }
         }
     }
