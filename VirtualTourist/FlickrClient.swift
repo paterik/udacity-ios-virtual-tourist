@@ -34,8 +34,8 @@ class FlickrClient: NSObject {
         
         static let _url: String = "https://api.flickr.com/services/rest/"
         static let _pubKey: String = "945c147f91129f6f5a795b8a58f15852"
-        static let _version: UInt8 = 1
         static let _format: String = "json"
+        static let _version: UInt8 = 1
     }
     
     struct apiBaseParams {
@@ -69,39 +69,26 @@ class FlickrClient: NSObject {
         static let _lonMax = 180.0
     }
     
-    func getRandomPageFromPersistedPin(_ targetPin: Pin) -> UInt32 {
-    
-        if  let numOfPages = targetPin.metaNumOfPages {
-            let maxNumOfPages = Int((Double(maxAllowedPages) / Double(maxPhotesEachPage)).rounded())
-            
-            var numPagesInt = numOfPages as! Int
-                numPagesInt = (numPagesInt > maxNumOfPages) ? maxNumOfPages : numPagesInt
-            
-            return UInt32((arc4random_uniform(UInt32(numPagesInt))))
-        }
-        
-        return 1
-    }
-    
     func getSampleImages (
        _ targetPin: Pin,
        _ completionHandlerForSampleImages: @escaping (_ success: Bool?, _ error: String?) -> Void) {
     
         let _requestParams = [
-        
+    
             apiBaseParams._format: apiConfig._format,
-            apiBaseParams._page: "1",
-            apiBaseParams._perPage: "16",
+            apiBaseParams._page: NSString(format: "%d", getRandomPageFromPersistedPin(targetPin)) as String,
+            apiBaseParams._perPage: NSString(format: "%d", maxPhotesEachPage) as String,
             apiBaseParams._noJSONCallback: "1",
             apiBaseParams._apiKey: apiConfig._pubKey,
             apiBaseParams._method: apiSearchParams.methodName,
+            
+            apiSearchParams.bbox: getBoundingBoxAsString(targetPin),
             
             apiSearchParams.safeSearch: "1",
             apiSearchParams.accuracy: "1",
             apiSearchParams.contentType: "1",
             apiSearchParams.media: "photos",
-            apiSearchParams.extras: "url_m",
-            apiSearchParams.bbox: getBoundingBoxAsString(targetPin)
+            apiSearchParams.extras: "url_m"
             
         ] as [String : AnyObject]
         
@@ -130,7 +117,7 @@ class FlickrClient: NSObject {
                             
                             print (photoURL)
                             print ("---")
-                            // let photo = Photo(photoURL: photoURLString, pin: targetPin, context: self.sharedContext)
+                            
                         }
                     })
                     

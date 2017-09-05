@@ -29,7 +29,23 @@ extension FlickrClient {
         return JSONString
     }
     
-    func getBoundingBoxAsString(_ pin: Pin) -> String {
+    func getRandomPageFromPersistedPin(
+       _ targetPin: Pin) -> UInt32 {
+        
+        if  let numOfPages = targetPin.metaNumOfPages {
+            let maxNumOfPages = Int((Double(maxAllowedPages) / Double(maxPhotesEachPage)).rounded())
+            
+            var numPagesInt = numOfPages as! Int
+            numPagesInt = (numPagesInt > maxNumOfPages) ? maxNumOfPages : numPagesInt
+            
+            return UInt32((arc4random_uniform(UInt32(numPagesInt)))) + 1
+        }
+        
+        return 1
+    }
+    
+    func getBoundingBoxAsString(
+       _ pin: Pin) -> String {
         
         let btmLeftLon = max(pin.longitude - apiSearchBBoxParams._bbHalfWidth, apiSearchBBoxParams._lonMin)
         let btmLeftLat = max(pin.latitude - apiSearchBBoxParams._bbHalfHeight, apiSearchBBoxParams._latMin)
