@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import CoreStore
 
 extension FlickrClient {
 
@@ -27,6 +28,31 @@ extension FlickrClient {
         } catch { if debugMode { print ("An Error occured in FlickrClient::getJSONFromStringArray -> \(error)") } }
         
         return JSONString
+    }
+
+    func getUpdatedPinByReference(
+       _ pin: Pin,
+       _ completionHandlerForUpdatedPin: @escaping (_ updatedPin: Pin?, _ success: Bool?, _ error: String?) -> Void) {
+        
+        CoreStore.perform(
+            
+            asynchronous: { (transaction) -> Pin in
+                
+                guard let refPin = transaction.fetchOne(From<Pin>(), Where("metaHash", isEqualTo: pin.metaHash)) else {
+                    completionHandlerForUpdatedPin(nil, false, "pin db reference not found!"); return pin
+                }
+                
+                refPin.metaNumOfPages = pin.metaNumOfPages; return refPin
+            },
+            success: { (transactionPin) in
+                
+                completionHandlerForUpdatedPin(CoreStore.fetchExisting(transactionPin)!, true, nil)
+                
+            },
+            failure: { (error) in
+                completionHandlerForUpdatedPin(nil, false, error.localizedDescription)
+            }
+        )
     }
     
     func getRandomPageFromPersistedPin(
