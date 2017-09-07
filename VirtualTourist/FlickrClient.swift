@@ -73,7 +73,7 @@ class FlickrClient: NSObject {
         static let _lonMax = 180.0
     }
     
-    func getSampleImages (
+    func getImagesByMapPin (
        _ targetPin: Pin,
        _ completionHandlerForSampleImages: @escaping (_ success: Bool?, _ error: String?) -> Void) {
     

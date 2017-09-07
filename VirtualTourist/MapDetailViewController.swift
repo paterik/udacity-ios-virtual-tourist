@@ -47,13 +47,13 @@ class MapDetailViewController: BaseController, MKMapViewDelegate {
         // just for development reasons, start downloading new images on each viewClass load
         //
         
-        flickrClient.getSampleImages (pin) {
+        flickrClient.getImagesByMapPin (pin) {
             
             (success, error) in
             
             if success == false {
-                print ("something bad happened :(")
-                print (error?.description ?? "unkown error")
+                print ("something realy bad happened o.O")
+                print (error?.description ?? "unkown error occurred")
             }
         }
     }
