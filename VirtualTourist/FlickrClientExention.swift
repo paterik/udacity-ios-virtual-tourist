@@ -34,6 +34,9 @@ extension FlickrClient {
        _ pin: Pin,
        _ completionHandlerForUpdatedPin: @escaping (_ updatedPin: Pin?, _ success: Bool?, _ error: String?) -> Void) {
         
+        let oldNumOfPages: UInt32 = pin.metaNumOfPages as! UInt32
+        var newNumOfPages: UInt32 = 0
+        
         CoreStore.perform(
             
             asynchronous: { (transaction) -> Pin in
@@ -46,8 +49,13 @@ extension FlickrClient {
             },
             success: { (transactionPin) in
                 
+                newNumOfPages = transactionPin.metaNumOfPages as! UInt32
                 completionHandlerForUpdatedPin(CoreStore.fetchExisting(transactionPin)!, true, nil)
                 
+                if self.debugMode == true {
+                    print ("--- pin object successfully updated ---")
+                    print ("    metaNumOfPages(old)=\(oldNumOfPages)), metaNumOfPages(new)=\(newNumOfPages)")
+                }
             },
             failure: { (error) in
                 completionHandlerForUpdatedPin(nil, false, error.localizedDescription)
