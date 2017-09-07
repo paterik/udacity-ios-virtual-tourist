@@ -7,9 +7,6 @@
 //
 
 import Foundation
-import Kingfisher
-import CoreStore
-import CryptoSwift
 
 class FlickrClient: NSObject {
     
@@ -76,76 +73,6 @@ class FlickrClient: NSObject {
         static let _lonMax = 180.0
     }
     
-    func getDownloadedImageForPhotoUrl(
-       _ imageUrl: String,
-       _ completionHandlerForDowloadedImage: @escaping (_ rawImage: UIImage?, _ success: Bool?, _ error: String?) -> Void) {
-    
-        ImageDownloader.default.downloadTimeout = maxDownloadTimeout
-        ImageDownloader.default.downloadImage(with: URL(string: imageUrl)!, options: [], progressBlock: nil)
-        {
-            (rawImage, error, url, data) in
-            
-            if (error != nil) {
-                
-                completionHandlerForDowloadedImage(nil, false, "\(String(describing: error!))")
-                
-            } else {
-                
-                completionHandlerForDowloadedImage(rawImage, true, nil)
-            }
-        }
-    }
-    
-    func handlePhotoByFlickrUrl (
-       _ mediaUrl: String,
-       _ completionHandlerForPhotoProcessor: @escaping (_ imgDataOrigin: Data?, _ imgDataPreview: Data?, _ success: Bool?, _ error: String?) -> Void) {
-    
-        self.getDownloadedImageForPhotoUrl(mediaUrl) { (rawImage, success, error) in
-            
-            if (error != nil) {
-                completionHandlerForPhotoProcessor(nil, nil, false, error)
-                
-            } else {
-                
-                // prepare origin image
-                guard let imageOrigin = UIImageJPEGRepresentation(rawImage!, 1) else {
-                    completionHandlerForPhotoProcessor(nil, nil, false, error); return
-                }
-                
-                // prepare thumbnail version of primary image (65% compression, 50% downscale)
-                guard let imagePreview = UIImageJPEGRepresentation(rawImage!.resized(withPercentage: 0.5)!, 0.65) else {
-                    completionHandlerForPhotoProcessor(nil, nil, false, error); return
-                }
-                
-                CoreStore.perform(
-                    
-                    asynchronous: { (transaction) -> Photo? in
-                        
-                        self.photo = transaction.create(Into<Photo>())
-                        self.photo!.imageSourceURL = mediaUrl
-                        self.photo!.imageHash = mediaUrl.md5()
-                        self.photo!.imageRaw = imageOrigin
-                        self.photo!.imagePreview = imagePreview
-                        
-                        return self.photo!
-                        
-                    },  success: { (transactionPhoto) in
-                    
-                        self.photo = CoreStore.fetchExisting(transactionPhoto!)!
-                        
-                        completionHandlerForPhotoProcessor(imageOrigin, imagePreview, true, nil)
-                        
-                    },  failure: { (error) in
-                    
-                        if self.debugMode == true { print ("--- photo object processing/persistence failed ---") }
-                    
-                        return
-                    }
-                )
-            }
-        }
-    }
-
     func getSampleImages (
        _ targetPin: Pin,
        _ completionHandlerForSampleImages: @escaping (_ success: Bool?, _ error: String?) -> Void) {
