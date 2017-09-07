@@ -134,6 +134,13 @@ class FlickrClient: NSObject {
                     let photoResultArray = photoResultDictionary["photo"] as? [[String: AnyObject]],
                     let numOfPages = photoResultDictionary["pages"] as? UInt32 {
                     
+                    // update targetPin with current request metadata for 'numOfPages'
+                    targetPin.metaNumOfPages = numOfPages as NSNumber
+                    self.getUpdatedPinByReference(targetPin) { (updatedPin, success, error) in
+                        if (error != nil) { completionHandlerForSampleImages(false, error); return }
+                        _ = updatedPin // refreshed pin currently not used <yet>
+                    }
+                    
                     DispatchQueue.main.async(execute: {
                         
                         for photoDictionary in photoResultArray {
@@ -152,30 +159,29 @@ class FlickrClient: NSObject {
                                         completionHandlerForSampleImages(false, error); return
                                     }
                                     
-                                    // prepare thumpnail version of primary image
+                                    // prepare thumbnail version of primary image
                                     guard let imagePreview = UIImageJPEGRepresentation(rawImage!.resized(withPercentage: 0.5)!, 0.65) else {
                                         completionHandlerForSampleImages(false, error); return
                                     }
                                     
                                     CoreStore.perform(
                                         
-                                        asynchronous: { (transaction) -> Photo in
+                                        asynchronous: { (transaction) -> Photo? in
                                             
                                             self.photo = transaction.create(Into<Photo>())
                                             self.photo!.imageSourceURL = imageUrl
                                             self.photo!.imageHash = imageUrl.md5()
                                             self.photo!.imageRaw = imageOrigin
                                             self.photo!.imagePreview = imagePreview
-                                            self.photo!.pin = targetPin
                                             
                                             return self.photo!
                                             
                                         },  success: { (transactionPhoto) in
                                         
-                                            self.photo = CoreStore.fetchExisting(transactionPhoto)!
+                                            self.photo = CoreStore.fetchExisting(transactionPhoto!)!
                                             if self.debugMode == true {
-                                                print ("imageOrigin=\(imageOrigin), imagePreview=\(imagePreview)")
                                                 print ("--- photo object created successfully ---")
+                                                print ("    imageOrigin=\(imageOrigin), imagePreview=\(imagePreview)")
                                             }
                                         
                                         },  failure: { (error) in
