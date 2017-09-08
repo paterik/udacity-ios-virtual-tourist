@@ -29,6 +29,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
     let mapPinIdentifier = "Pin"
     let mapPinImageName = "icnMapPin_v1"
     let mapEditModeInfoLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
+    let flickrClient = FlickrClient.sharedInstance
     
     //
     // MARK: Class Variables
@@ -178,6 +179,8 @@ class MapViewController: BaseController, MKMapViewDelegate {
                         if self.appDebugMode == true { print ("--- mapMapPinObject created successfully ---") }
                     
                     },  failure: { (error) in
+                        
+                        self._pinLastAdded = nil // reset last added pin holder, prevent photo preload on error
                         self._handleErrorAsSimpleDialog("Error", error.localizedDescription)
                         
                         return
@@ -186,10 +189,25 @@ class MapViewController: BaseController, MKMapViewDelegate {
             
             case UIGestureRecognizerState.ended:
                 
-                if self.appDebugMode == true {
-                    let numOfPins = CoreStore.fetchAll(From<Pin>())?.count
-                    print ("pin #\(numOfPins!) set successfully done at \(coordinate)")
+                // fetch download of pin related photos as quick as possible if last pin was set successfully
+                if self._pinLastAdded !== nil {
+                    
+                    flickrClient.getImagesByMapPin (self._pinLastAdded!) {
+                        
+                        (success, error) in
+                        
+                        if success == false {
+                            // allow error to be shown (even in production mode)
+                            self._handleErrorAsSimpleDialog("Error", error?.description ?? "unkown error occurred")
+                        }
+                    }
+                    
+                    if self.appDebugMode == true {
+                        let numOfPins = CoreStore.fetchAll(From<Pin>())?.count
+                        print ("pin #\(numOfPins!) set successfully done at \(coordinate)")
+                    }
                 }
+            
             
             default: return
         }

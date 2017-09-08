@@ -42,20 +42,6 @@ class MapDetailViewController: BaseController, MKMapViewDelegate {
         super.viewDidLoad()
         
         mapSetup()
-        
-        //
-        // just for development reasons, start downloading new images on each viewClass load
-        //
-        
-        flickrClient.getImagesByMapPin (pin) {
-            
-            (success, error) in
-            
-            if success == false {
-                print ("something realy bad happened o.O")
-                print (error?.description ?? "unkown error occurred")
-            }
-        }
     }
     
     override func didReceiveMemoryWarning() {
