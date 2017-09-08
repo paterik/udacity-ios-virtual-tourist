@@ -78,7 +78,7 @@ class FlickrClient: NSObject {
     
     func getImagesByMapPin (
        _ targetPin: Pin,
-       _ completionHandlerForSampleImages: @escaping (_ success: Bool?, _ error: String?) -> Void) {
+       _ completionHandlerForFetchFlickrImages: @escaping (_ success: Bool?, _ error: String?) -> Void) {
     
         let _requestParams = [
     
@@ -105,7 +105,7 @@ class FlickrClient: NSObject {
             
             if (error != nil) {
                 
-                completionHandlerForSampleImages(false, "Oops! Request could not be handled: \(String(describing: error!))")
+                completionHandlerForFetchFlickrImages(false, "Oops! Request could not be handled: \(String(describing: error!))")
                 
             } else {
             
@@ -116,10 +116,11 @@ class FlickrClient: NSObject {
                     
                     // update targetPin with current request metadata for 'numOfPages'
                     targetPin.metaNumOfPages = numOfPages as NSNumber
-                    self.getUpdatedPinByReference(targetPin) { (updatedPin, success, error) in
-                        if (error != nil) { completionHandlerForSampleImages(false, error); return }
+                    self.setPinNumberOfPagesByReference(targetPin) { (updatedPin, success, error) in
+                        if (error != nil) { completionHandlerForFetchFlickrImages(false, error); return }
                     }
                     
+                    // start dispatched download process, image processsing and coreData/coreStock handling of resulting photos
                     DispatchQueue.main.async(execute: {
                         
                         for photoDictionary in photoResultArray {
@@ -130,7 +131,7 @@ class FlickrClient: NSObject {
                                 
                                 if (error != nil) {
                                     
-                                    completionHandlerForSampleImages(false, "Oops! Download could not be handled: \(String(describing: error!))")
+                                    completionHandlerForFetchFlickrImages(false, "Oops! Download could not be handled: \(error!)")
                                     
                                 } else {
                                 
