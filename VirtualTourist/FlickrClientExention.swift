@@ -30,6 +30,34 @@ extension FlickrClient {
         
         return JSONString
     }
+    
+    func getPinByReference(
+       _ targetPin: Pin,
+       _ completionHandlerForPin: @escaping (_ updatedPin: Pin?, _ success: Bool?, _ error: String?) -> Void) {
+        
+        CoreStore.perform(
+            
+            asynchronous: { (transaction) -> Pin in
+                
+                guard let refPin = transaction.fetchOne(From<Pin>(), Where("metaHash", isEqualTo: targetPin.metaHash)) else {
+                    completionHandlerForPin(nil, false, "pin db reference not available anymore!"); return targetPin
+                }
+                
+                return refPin
+            },
+            success: { (transactionPin) in
+                
+                completionHandlerForPin(CoreStore.fetchExisting(transactionPin)!, true, nil)
+                
+                if self.debugMode == true {
+                    print ("--- pin object successfully fetched ---")
+                }
+            },
+            failure: { (error) in
+                completionHandlerForPin(nil, false, error.localizedDescription)
+            }
+        )
+    }
 
     func getUpdatedPinByReference(
        _ pin: Pin,
@@ -112,6 +140,7 @@ extension FlickrClient {
     
     func handlePhotoByFlickrUrl (
        _ mediaUrl: String,
+       _ targetPin: Pin,
        _ completionHandlerForPhotoProcessor: @escaping (_ imgDataOrigin: Data?, _ imgDataPreview: Data?, _ success: Bool?, _ error: String?) -> Void) {
         
         self.getDownloadedImageByFlickrUrl(mediaUrl) { (rawImage, success, error) in
@@ -132,7 +161,16 @@ extension FlickrClient {
                     completionHandlerForPhotoProcessor(nil, nil, false, error); return
                 }
                 
-                CoreStore.perform(
+                self.photo = Photo.create(
+                    imageSourceUrl: mediaUrl,
+                    imageOrigin: imageOrigin,
+                    imagePreview: imagePreview,
+                    targetPin: targetPin
+                )
+                
+                completionHandlerForPhotoProcessor(imageOrigin, imagePreview, true, nil)
+                
+                /*CoreStore.perform(
                     
                     asynchronous: { (transaction) -> Photo? in
                         
@@ -141,6 +179,7 @@ extension FlickrClient {
                         self.photo!.imageHash = mediaUrl.md5()
                         self.photo!.imageRaw = imageOrigin
                         self.photo!.imagePreview = imagePreview
+                        self.photo!.pin = targetPin
                         
                         return self.photo!
                         
@@ -156,7 +195,7 @@ extension FlickrClient {
                     
                         return
                     }
-                )
+                )*/
             }
         }
     }

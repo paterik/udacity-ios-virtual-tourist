@@ -118,14 +118,13 @@ class FlickrClient: NSObject {
                     targetPin.metaNumOfPages = numOfPages as NSNumber
                     self.getUpdatedPinByReference(targetPin) { (updatedPin, success, error) in
                         if (error != nil) { completionHandlerForSampleImages(false, error); return }
-                        _ = updatedPin // refreshed pin currently not used or required <yet>
                     }
                     
                     DispatchQueue.main.async(execute: {
                         
                         for photoDictionary in photoResultArray {
                         
-                            self.handlePhotoByFlickrUrl(photoDictionary["url_m"] as! String)
+                            self.handlePhotoByFlickrUrl(photoDictionary["url_m"] as! String, targetPin)
                             {
                                 (imgDataOrigin, imgDataPreview, success, error) in
                                 
