@@ -17,7 +17,6 @@
 		B140F0A11E9FE94E00EEEEA4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B140F0A01E9FE94E00EEEEA4 /* Assets.xcassets */; };
 		B140F0A41E9FE94E00EEEEA4 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B140F0A21E9FE94E00EEEEA4 /* LaunchScreen.storyboard */; };
 		B16313BF1F5A77D000CAC474 /* FlickrClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B16313BE1F5A77D000CAC474 /* FlickrClient.swift */; };
-		B16313C11F5A83E700CAC474 /* FlickrImageData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B16313C01F5A83E700CAC474 /* FlickrImageData.swift */; };
 		B16313C41F5A92CC00CAC474 /* RequestClientExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = B16313C31F5A92CC00CAC474 /* RequestClientExtension.swift */; };
 		B1AC4CE01F5055950032C590 /* MapRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1AC4CDF1F5055950032C590 /* MapRegion.swift */; };
 		B1AC4CE21F52F4860032C590 /* MapViewControllerExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1AC4CE11F52F4860032C590 /* MapViewControllerExtension.swift */; };
@@ -46,7 +45,6 @@
 		B140F0A31E9FE94E00EEEEA4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B140F0A51E9FE94E00EEEEA4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B16313BE1F5A77D000CAC474 /* FlickrClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlickrClient.swift; sourceTree = "<group>"; };
-		B16313C01F5A83E700CAC474 /* FlickrImageData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlickrImageData.swift; sourceTree = "<group>"; };
 		B16313C31F5A92CC00CAC474 /* RequestClientExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestClientExtension.swift; sourceTree = "<group>"; };
 		B1AC4CDF1F5055950032C590 /* MapRegion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapRegion.swift; sourceTree = "<group>"; };
 		B1AC4CE11F52F4860032C590 /* MapViewControllerExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewControllerExtension.swift; sourceTree = "<group>"; };
@@ -167,7 +165,6 @@
 			children = (
 				B1AF26EF1F5AC147006B94CC /* extension */,
 				B16313BE1F5A77D000CAC474 /* FlickrClient.swift */,
-				B16313C01F5A83E700CAC474 /* FlickrImageData.swift */,
 			);
 			name = flickr.com;
 			sourceTree = "<group>";
@@ -465,7 +462,6 @@
 				B16313C41F5A92CC00CAC474 /* RequestClientExtension.swift in Sources */,
 				B16313BF1F5A77D000CAC474 /* FlickrClient.swift in Sources */,
 				B1AF26F11F5AC162006B94CC /* FlickrClientExention.swift in Sources */,
-				B16313C11F5A83E700CAC474 /* FlickrImageData.swift in Sources */,
 				B1F8D1A11F4F2DD50025D575 /* Photo.swift in Sources */,
 				B1AC4CE01F5055950032C590 /* MapRegion.swift in Sources */,
 				B1AC4CE21F52F4860032C590 /* MapViewControllerExtension.swift in Sources */,
