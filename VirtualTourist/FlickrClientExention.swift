@@ -26,40 +26,12 @@ extension FlickrClient {
             
             if let _jsonString = String(data: jsonData, encoding: String.Encoding.utf8) { JSONString = _jsonString }
             
-        } catch { if debugMode { print ("An Error occured in FlickrClient::getJSONFromStringArray -> \(error)") } }
+        } catch { if debugMode { print ("An error occured in FlickrClient::getJSONFromStringArray -> \(error)") } }
         
         return JSONString
     }
     
-    func getPinByReference(
-       _ targetPin: Pin,
-       _ completionHandlerForPin: @escaping (_ updatedPin: Pin?, _ success: Bool?, _ error: String?) -> Void) {
-        
-        CoreStore.perform(
-            
-            asynchronous: { (transaction) -> Pin in
-                
-                guard let refPin = transaction.fetchOne(From<Pin>(), Where("metaHash", isEqualTo: targetPin.metaHash)) else {
-                    completionHandlerForPin(nil, false, "pin db reference not available anymore!"); return targetPin
-                }
-                
-                return refPin
-            },
-            success: { (transactionPin) in
-                
-                completionHandlerForPin(CoreStore.fetchExisting(transactionPin)!, true, nil)
-                
-                if self.debugMode == true {
-                    print ("--- pin object successfully fetched ---")
-                }
-            },
-            failure: { (error) in
-                completionHandlerForPin(nil, false, error.localizedDescription)
-            }
-        )
-    }
-
-    func getUpdatedPinByReference(
+    func setPinNumberOfPagesByReference(
        _ pin: Pin,
        _ completionHandlerForUpdatedPin: @escaping (_ updatedPin: Pin?, _ success: Bool?, _ error: String?) -> Void) {
         
@@ -71,7 +43,7 @@ extension FlickrClient {
             asynchronous: { (transaction) -> Pin in
                 
                 guard let refPin = transaction.fetchOne(From<Pin>(), Where("metaHash", isEqualTo: pin.metaHash)) else {
-                    completionHandlerForUpdatedPin(nil, false, "pin db reference not available anymore!"); return pin
+                    completionHandlerForUpdatedPin(nil, false, "Oops! Pin reference lost in space ..."); return pin
                 }
                 
                 refPin.metaNumOfPages = pin.metaNumOfPages; return refPin
@@ -99,7 +71,7 @@ extension FlickrClient {
             let maxNumOfPages = Int((Double(maxAllowedPages) / Double(maxPhotesEachPage)).rounded())
             
             var numPagesInt = numOfPages as! Int
-            numPagesInt = (numPagesInt > maxNumOfPages) ? maxNumOfPages : numPagesInt
+                numPagesInt = (numPagesInt > maxNumOfPages) ? maxNumOfPages : numPagesInt
             
             return UInt32((arc4random_uniform(UInt32(numPagesInt)))) + 1
         }
@@ -143,6 +115,7 @@ extension FlickrClient {
        _ targetPin: Pin,
        _ completionHandlerForPhotoProcessor: @escaping (_ imgDataOrigin: Data?, _ imgDataPreview: Data?, _ success: Bool?, _ error: String?) -> Void) {
         
+        // handle download using ImageDownloader file processor
         self.getDownloadedImageByFlickrUrl(mediaUrl) { (rawImage, success, error) in
             
             if (error != nil) {
@@ -150,52 +123,53 @@ extension FlickrClient {
                 
             } else {
                 
-                // prepare origin image
+                // process/prepare origin image
                 guard let imageOrigin = UIImageJPEGRepresentation(rawImage!, 1) else {
                     completionHandlerForPhotoProcessor(nil, nil, false, error); return
                 }
                 
-                // prepare thumbnail version of primary image (65% compression, 50% downscale)
+                // process/prepare thumbnail version of primary image (65% compression, 50% downscale)
                 guard let imagePreview = UIImageJPEGRepresentation(
                     rawImage!.resized(withPercentage: self.photoPreviewDownscale)!, self.photoPreviewQuality) else {
                     completionHandlerForPhotoProcessor(nil, nil, false, error); return
                 }
                 
-                self.photo = Photo.create(
-                    imageSourceUrl: mediaUrl,
-                    imageOrigin: imageOrigin,
-                    imagePreview: imagePreview,
-                    targetPin: targetPin
-                )
-                
-                completionHandlerForPhotoProcessor(imageOrigin, imagePreview, true, nil)
-                
-                /*CoreStore.perform(
+                CoreStore.perform(
                     
                     asynchronous: { (transaction) -> Photo? in
                         
-                        self.photo = transaction.create(Into<Photo>())
-                        self.photo!.imageSourceURL = mediaUrl
-                        self.photo!.imageHash = mediaUrl.md5()
-                        self.photo!.imageRaw = imageOrigin
-                        self.photo!.imagePreview = imagePreview
-                        self.photo!.pin = targetPin
+                        if let _pinRef = transaction.fetchOne(From<Pin>(), Where("metaHash", isEqualTo: targetPin.metaHash))
+                        {
+                            self.photo = transaction.create(Into<Photo>())
+                            self.photo!.imageSourceURL = mediaUrl
+                            self.photo!.imageHash = mediaUrl.md5()
+                            self.photo!.imageRaw = imageOrigin
+                            self.photo!.imagePreview = imagePreview
+                            self.photo!.pin = _pinRef
                         
-                        return self.photo!
+                            return self.photo!
+                        }
+                        
+                        return nil
                         
                     },  success: { (transactionPhoto) in
                     
-                        self.photo = CoreStore.fetchExisting(transactionPhoto!)!
+                        if transactionPhoto !== nil {
+                            
+                            completionHandlerForPhotoProcessor(imageOrigin, imagePreview, true, nil)
+                            
+                        } else {
+                        
+                            completionHandlerForPhotoProcessor(nil, nil, false, "Oops! Pin reference lost in space ...")
+                        }
+                        
+                    },  failure: { (error) in
                     
-                        completionHandlerForPhotoProcessor(imageOrigin, imagePreview, true, nil)
-                    
-                        },  failure: { (error) in
-                    
-                        if self.debugMode == true { print ("--- photo object processing/persistence failed ---") }
+                        if self.debugMode == true { print ("--- photo object processing/persistence failed: \(error) ---") }
                     
                         return
                     }
-                )*/
+                )
             }
         }
     }
