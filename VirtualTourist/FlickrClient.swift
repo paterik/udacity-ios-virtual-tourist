@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 class FlickrClient: NSObject {
     
@@ -26,6 +27,8 @@ class FlickrClient: NSObject {
     let maxAllowedPages = 2500
     let maxPhotesEachPage = 20
     let maxDownloadTimeout = 30.0
+    let photoPreviewDownscale: CGFloat = 0.5
+    let photoPreviewQuality: CGFloat = 0.65
     
     var photo:Photo?
     
@@ -115,7 +118,7 @@ class FlickrClient: NSObject {
                     targetPin.metaNumOfPages = numOfPages as NSNumber
                     self.getUpdatedPinByReference(targetPin) { (updatedPin, success, error) in
                         if (error != nil) { completionHandlerForSampleImages(false, error); return }
-                        _ = updatedPin // refreshed pin currently not used <yet>
+                        _ = updatedPin // refreshed pin currently not used or required <yet>
                     }
                     
                     DispatchQueue.main.async(execute: {

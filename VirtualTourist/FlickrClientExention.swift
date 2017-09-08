@@ -43,7 +43,7 @@ extension FlickrClient {
             asynchronous: { (transaction) -> Pin in
                 
                 guard let refPin = transaction.fetchOne(From<Pin>(), Where("metaHash", isEqualTo: pin.metaHash)) else {
-                    completionHandlerForUpdatedPin(nil, false, "pin db reference not found!"); return pin
+                    completionHandlerForUpdatedPin(nil, false, "pin db reference not available anymore!"); return pin
                 }
                 
                 refPin.metaNumOfPages = pin.metaNumOfPages; return refPin
@@ -127,7 +127,8 @@ extension FlickrClient {
                 }
                 
                 // prepare thumbnail version of primary image (65% compression, 50% downscale)
-                guard let imagePreview = UIImageJPEGRepresentation(rawImage!.resized(withPercentage: 0.5)!, 0.65) else {
+                guard let imagePreview = UIImageJPEGRepresentation(
+                    rawImage!.resized(withPercentage: self.photoPreviewDownscale)!, self.photoPreviewQuality) else {
                     completionHandlerForPhotoProcessor(nil, nil, false, error); return
                 }
                 
