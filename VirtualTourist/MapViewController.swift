@@ -66,9 +66,9 @@ class MapViewController: BaseController, MKMapViewDelegate {
     
     @IBAction func toggleEditMode(_ sender: AnyObject) {
         
-        btnEditModeItem.title = "EDIT"
+        btnEditModeItem.image = UIImage(named: "icnLock_v1")
         if !mapEditMode {
-            btnEditModeItem.title = "DONE"
+            btnEditModeItem.image = UIImage(named: "icnUnlock_v1")
         }
         
         mapEditModeInfoLabel.isEnabled = !mapEditMode

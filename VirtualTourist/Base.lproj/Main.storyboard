@@ -35,7 +35,8 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Virtual Tourist" id="7kj-mn-xme">
-                        <barButtonItem key="rightBarButtonItem" title="EDIT" id="1jd-wA-smI">
+                        <barButtonItem key="rightBarButtonItem" image="icnLock_v1" id="1jd-wA-smI">
+                            <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <connections>
                                 <action selector="toggleEditMode:" destination="BYZ-38-t0r" id="mlB-fK-GbF"/>
                             </connections>
@@ -69,8 +70,9 @@
                             <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0wd-Th-j40">
                                 <rect key="frame" x="0.0" y="17" width="375" height="44"/>
                                 <items>
-                                    <navigationItem title="Virtual Tourist Images" id="4TW-P3-jhZ">
-                                        <barButtonItem key="leftBarButtonItem" title="BACK" id="bMJ-M9-N9I">
+                                    <navigationItem title="Location Photos" id="4TW-P3-jhZ">
+                                        <barButtonItem key="leftBarButtonItem" image="icnReturn_v1" id="bMJ-M9-N9I">
+                                            <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <connections>
                                                 <action selector="btnBackToMapAction:" destination="8iK-of-cBi" id="NIg-AQ-T2B"/>
                                             </connections>
@@ -118,4 +120,8 @@
             <point key="canvasLocation" x="61.600000000000001" y="38.23088455772114"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="icnLock_v1" width="25" height="25"/>
+        <image name="icnReturn_v1" width="25" height="25"/>
+    </resources>
 </document>

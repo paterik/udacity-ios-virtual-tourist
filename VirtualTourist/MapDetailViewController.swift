@@ -24,7 +24,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate {
     //
     
     let mapPinIdentifier = "MiniMapPin"
-    let mapPinImageName = "icnMapPin_v1"
+    let mapPinImageName = "icnMapPin_v2"
     let flickrClient = FlickrClient.sharedInstance
     
     //
