@@ -27,7 +27,8 @@ class MapViewController: BaseController, MKMapViewDelegate {
     
     let mapLongPressDuration = 0.875
     let mapPinIdentifier = "Pin"
-    let mapPinImageName = "icnMapPin_v1"
+    let mapPinPersistedImageName = "icnMapPin_v1"
+    let mapPinNewAddedImageName = "icnMapPin_v2"
     let mapPinIncompleteImageName = "icnMapPin_v3"
     let mapEditModeInfoLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
     let flickrClient = FlickrClient.sharedInstance
@@ -39,11 +40,11 @@ class MapViewController: BaseController, MKMapViewDelegate {
     var _pinSelected:Pin!
     var _pinLastAdded:Pin? = nil
     
-    var mapEditMode:Bool = false
     var mapViewPin:Pin?
     var mapViewPins:[Pin]?
     var mapViewRegion:MapRegion?
     var mapViewRegionObjectId:NSManagedObjectID? = nil
+    var mapEditMode:Bool = false
     
     //
     // MARK: UIViewController Overrides
@@ -53,12 +54,18 @@ class MapViewController: BaseController, MKMapViewDelegate {
         
         super.viewDidLoad()
         
-        mapSetup()
-    }
-
-    override func didReceiveMemoryWarning() {
+        setupUIMap()
         
-        super.didReceiveMemoryWarning()
+        loadMapRegion()
+        loadMapAnnotations()
+        loadMapAdditions()
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(MapViewController.handleLastPhotoTransfered),
+            name: NSNotification.Name(rawValue: appDelegate.pinPhotoDownloadedNotification),
+            object: nil
+        )
     }
     
     //
@@ -105,17 +112,16 @@ class MapViewController: BaseController, MKMapViewDelegate {
         } else {
                 
             annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: mapPinIdentifier)
-            annotationView.image = UIImage(named: mapPinImageName)
+            annotationView.image = UIImage(named: mapPinNewAddedImageName)
             annotationView.canShowCallout = false
             annotationView.isDraggable = false
             
-            // mark pins without images as "incomplete"
             let _photoAnnotation = annotationView.annotation as! Pin
-            if  _photoAnnotation.photos.count == 0 {
-                annotationView.image = UIImage(named: mapPinIncompleteImageName)
+            if  _photoAnnotation.photos.count > 0 {
+                 annotationView.image = UIImage(named: mapPinPersistedImageName)
             }
         }
-            
+        
         return annotationView
     }
     
@@ -141,24 +147,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
             present(alert, animated: true, completion: nil)
         }
     }
-    
-    //
-    // MARK: MapView Helper Methods
-    //
-    
-    func mapSetup() {
-    
-        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.mapAddPin(_:)))
-            longPress.minimumPressDuration = mapLongPressDuration
         
-        mapView.addGestureRecognizer(longPress)
-        mapView.delegate = self
-        
-        loadMapRegion()
-        loadMapAnnotations()
-        loadMapAdditions()
-    }
-    
     func mapAddPin(_ gestureRecognizer: UIGestureRecognizer) {
         
         let locationInMap = gestureRecognizer.location(in: mapView)
@@ -196,25 +185,28 @@ class MapViewController: BaseController, MKMapViewDelegate {
             
             case UIGestureRecognizerState.ended:
                 
+                //
                 // fetch download of pin related photos as quick as possible if last pin was set successfully
-                if self._pinLastAdded !== nil {
+                //
+                if  _pinLastAdded !== nil {
                     
-                    flickrClient.getImagesByMapPin (self._pinLastAdded!) {
+                    flickrClient.getImagesByMapPin (_pinLastAdded!) {
                         
                         (success, error) in
                         
-                        if success == false {
+                        if success == false || error != nil {
+                            
                             // allow error to be shown (even in production mode)
                             self._handleErrorAsSimpleDialog("Error", error?.description ?? "unkown error occurred")
                         }
                     }
                     
-                    if self.appDebugMode == true {
+                    if appDebugMode == true {
+                        
                         let numOfPins = CoreStore.fetchAll(From<Pin>())?.count
                         print ("pin #\(numOfPins!) set successfully done at \(coordinate)")
                     }
                 }
-            
             
             default: return
         }

@@ -13,6 +13,19 @@ import CoreStore
 
 extension MapViewController {
 
+    //
+    // MARK: MapView Helper Methods
+    //
+    
+    func setupUIMap() {
+        
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.mapAddPin(_:)))
+        longPress.minimumPressDuration = mapLongPressDuration
+        
+        mapView.addGestureRecognizer(longPress)
+        mapView.delegate = self
+    }
+
     func loadMapRegion() {
         
         mapViewRegion = CoreStore.fetchOne(From<MapRegion>())
@@ -31,7 +44,6 @@ extension MapViewController {
         
         mapViewRegionObjectId = mapViewRegion!.objectID
         mapView.region = mapViewRegion!.region
-
     }
     
     func saveMapRegion() {
@@ -78,6 +90,23 @@ extension MapViewController {
         }
     }
     
+    func handleLastPhotoTransfered(_ notification: NSNotification?) {
+        
+        if _pinLastAdded == nil || notification == nil { return }
+        
+        if let userInfo = notification!.userInfo as? [String: Bool]
+        {
+            _pinLastAdded!.isDownloading = true
+            
+            if let completed = userInfo["completed"] {
+                if completed == true {
+                    
+                    _pinLastAdded!.isDownloading = !completed
+                }
+            }
+        }
+    }
+    
     func _getAllPins() -> [Pin]? {
         
         return CoreStore.fetchAll(From<Pin>())
@@ -109,8 +138,10 @@ extension MapViewController {
 
         // check that corresponding photos deleted also
         if let photos = CoreStore.fetchAll(From<Photo>()) {
-            print ("===============================")
-            print ("\(photos.count) still available")
+            if self.appDebugMode == true {
+                print ("===============================")
+                print ("\(photos.count) still available")
+            }
         }
     }
     
