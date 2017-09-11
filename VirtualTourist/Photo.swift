@@ -19,3 +19,11 @@ class Photo: NSManagedObject {
     @NSManaged var imageHash: String
     @NSManaged var pin: Pin?
 }
+
+struct PhotoCellObject {
+    
+    var imageHash: String?
+    var imageSourceURL: String?
+    var imageOrigin: UIImage?
+    var imagePreview: UIImage?
+}
