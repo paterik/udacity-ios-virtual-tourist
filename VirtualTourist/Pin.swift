@@ -19,6 +19,8 @@ class Pin: NSManagedObject, MKAnnotation {
     @NSManaged var metaHash: String
     @NSManaged var metaNumOfPages: NSNumber?
     
+    var isDownloading = false
+    
     var coordinate: CLLocationCoordinate2D {
         
         get { return CLLocationCoordinate2DMake(latitude, longitude) }
