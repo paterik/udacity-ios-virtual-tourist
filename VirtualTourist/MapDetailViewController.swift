@@ -8,9 +8,9 @@
 
 import UIKit
 import MapKit
-import CoreData
+import CoreStore
 
-class MapDetailViewController: BaseController, MKMapViewDelegate {
+class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionViewDataSource, UICollectionViewDelegate {
     
     //
     // MARK: IBOutlet Variables
@@ -18,6 +18,10 @@ class MapDetailViewController: BaseController, MKMapViewDelegate {
     
     @IBOutlet weak var btnBackToMapItem: UIBarButtonItem!
     @IBOutlet weak var miniMapView: MKMapView!
+    @IBOutlet weak var photoCollectionView: UICollectionView!
+    @IBOutlet weak var lblNoImagesFound: UILabel!
+    @IBOutlet weak var btnRefreshPhotosForThisLocation: UIBarButtonItem!
+    @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
     
     //
     // MARK: Class Constants
@@ -25,6 +29,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate {
     
     let mapPinIdentifier = "MiniMapPin"
     let mapPinImageName = "icnMapPin_v2"
+    let collectionViewCellIdentifier = "flickrCell"
     let flickrClient = FlickrClient.sharedInstance
     
     //
@@ -32,7 +37,9 @@ class MapDetailViewController: BaseController, MKMapViewDelegate {
     //
     
     var pin: Pin!
- 
+    var photoDataObjects = [Photo]()
+    var photoObjects = [PhotoCellObject]()
+    
     //
     // MARK: UIViewController Overrides
     //
@@ -42,6 +49,60 @@ class MapDetailViewController: BaseController, MKMapViewDelegate {
         super.viewDidLoad()
         
         mapSetup()
+        collectionViewSetup()
+    }
+    
+    override func willRotate(
+        to toInterfaceOrientation: UIInterfaceOrientation,
+        duration: TimeInterval) {
+        
+        photoCollectionView!.collectionViewLayout.invalidateLayout()
+    }
+    
+    func collectionViewSetup() {
+    
+        photoCollectionView.isHidden = false
+        photoCollectionView.delegate = self
+        photoCollectionView.dataSource = self
+        lblNoImagesFound.isHidden = true
+        
+        getPhotosForCollectionByPin(pin) {
+        
+            (photos, success, error) in
+        
+            if success! == true {
+                
+                self.photoDataObjects = photos!
+                for photo in self.photoDataObjects {
+                    
+                    var UIImageOrigin: UIImage?
+                    var UIImagePreview: UIImage?
+                    
+                    if let _imageOrigin = photo.imageRaw {
+                        UIImageOrigin = UIImage(data: _imageOrigin, scale: 1.0)
+                    }
+                    
+                    if let _imagePreview = photo.imagePreview {
+                        UIImagePreview = UIImage(data: _imagePreview, scale: 1.0)
+                    }
+                    
+                    let photoObject = PhotoCellObject(
+                        imageHash: photo.imageHash,
+                        imageSourceURL: photo.imageSourceURL,
+                        imageOrigin: UIImageOrigin,
+                        imagePreview: UIImagePreview
+                    )
+                    
+                    self.photoObjects.append(photoObject)
+                }
+                
+                self.refreshCollectionView()
+                
+            } else {
+                
+                if self.appDebugMode { print (error ?? "unknown image handler problem") }
+            }
+        }
     }
     
     override func didReceiveMemoryWarning() {
@@ -56,7 +117,74 @@ class MapDetailViewController: BaseController, MKMapViewDelegate {
     @IBAction func btnBackToMapAction(_ sender: Any) {
     
         dismiss(animated: true, completion: nil)
+    }
     
+    //
+    // MARK: CollectionView Delegates
+    //
+    
+    func collectionView(
+       _ collectionView: UICollectionView,
+         numberOfItemsInSection section: Int) -> Int {
+        
+        return photoObjects.count
+    }
+    
+    func collectionView(
+       _ collectionView: UICollectionView,
+         cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
+        let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: collectionViewCellIdentifier,
+            for: indexPath) as! FlickrCell
+        
+        let photo = photoObjects[indexPath.row]
+        
+        if photo.imagePreview != nil {
+            cell.imageView.image = photo.imagePreview
+            if appDebugMode { print ("using preview image for cel #\(indexPath.row)") }
+        } else if photo.imageOrigin != nil {
+            cell.imageView.image = photo.imageOrigin
+            if appDebugMode { print ("using origin image for cel #\(indexPath.row)") }
+        } else {
+            cell.imageView.image = UIImage(named: "sample_image")
+            if appDebugMode { print ("using sample image for cel #\(indexPath.row)") }
+        }
+
+        cell.activityIndicator.stopAnimating()
+        cell.activityIndicator.isHidden = true
+        
+        return cell
+    }
+    
+    func collectionView(
+       _ collectionView: UICollectionView,
+         layout collectionViewLayout: UICollectionViewLayout,
+         sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
+        
+        var collectionCellWidth: CGFloat!
+        var collectionCellHeight: CGFloat!
+        var collectionCellPadding: CGFloat = 12.0
+        var collectionCellSpacing: CGFloat = 8.0
+        var numberOfCellInRow: CGFloat = 2.0
+        
+        if UIApplication.shared.statusBarOrientation != UIInterfaceOrientation.portrait {
+            numberOfCellInRow = 3.0
+            collectionCellPadding = 8.0
+            collectionCellSpacing = 4.0
+        }
+        
+        collectionCellWidth = (view.frame.width / numberOfCellInRow) - collectionCellPadding
+        collectionCellHeight = collectionCellWidth
+        
+        flowLayout.itemSize = CGSize(width: collectionCellWidth, height: collectionCellHeight)
+        flowLayout.minimumInteritemSpacing = collectionCellSpacing
+        flowLayout.minimumLineSpacing = collectionCellSpacing
+        
+        return CGSize(
+            width: collectionCellWidth,
+            height: collectionCellHeight
+        );
     }
     
     //
@@ -99,6 +227,14 @@ class MapDetailViewController: BaseController, MKMapViewDelegate {
 
         miniMapView.delegate = self
         miniMapView.setRegion(pinRegion, animated: true)
+        miniMapView.setCenter(pin.coordinate, animated: true)
         miniMapView.addAnnotation(pin)
+    }
+    
+    @IBAction func btnReloadPhotoCollection(_ sender: Any) {
+        
+        for photoObject in self.photoObjects {
+            print ("002 => \(photoObject.imageHash, photoObject.imageSourceURL)")
+        };  print ("---    ------------------------")
     }
 }
