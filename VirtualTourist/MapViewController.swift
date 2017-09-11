@@ -28,6 +28,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
     let mapLongPressDuration = 0.875
     let mapPinIdentifier = "Pin"
     let mapPinImageName = "icnMapPin_v1"
+    let mapPinIncompleteImageName = "icnMapPin_v3"
     let mapEditModeInfoLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
     let flickrClient = FlickrClient.sharedInstance
     
@@ -107,6 +108,12 @@ class MapViewController: BaseController, MKMapViewDelegate {
             annotationView.image = UIImage(named: mapPinImageName)
             annotationView.canShowCallout = false
             annotationView.isDraggable = false
+            
+            // mark pins without images as "incomplete"
+            let _photoAnnotation = annotationView.annotation as! Pin
+            if  _photoAnnotation.photos.count == 0 {
+                annotationView.image = UIImage(named: mapPinIncompleteImageName)
+            }
         }
             
         return annotationView
