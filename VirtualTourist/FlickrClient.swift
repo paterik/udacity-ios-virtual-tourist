@@ -22,6 +22,8 @@ class FlickrClient: NSObject {
     //
     
     let debugMode: Bool = true
+    let appDelegate = UIApplication.shared.delegate as! AppDelegate
+    
     let session = URLSession.shared
     let client = RequestClient.sharedInstance
     let maxAllowedPages = 2500
@@ -79,7 +81,7 @@ class FlickrClient: NSObject {
     func getImagesByMapPin (
        _ targetPin: Pin,
        _ completionHandlerForFetchFlickrImages: @escaping (_ success: Bool?, _ error: String?) -> Void) {
-    
+        
         let _requestParams = [
     
             apiBaseParams._format: apiConfig._format,
@@ -123,7 +125,8 @@ class FlickrClient: NSObject {
                     // start dispatched download process, image processsing and coreData/coreStock handling of resulting photos
                     DispatchQueue.main.async(execute: {
                         
-                        for photoDictionary in photoResultArray {
+                        let maxPhotoIndex = photoResultArray.count - 1
+                        for (index, photoDictionary) in photoResultArray.enumerated() {
                         
                             self.handlePhotoByFlickrUrl(photoDictionary["url_m"] as! String, targetPin)
                             {
@@ -133,11 +136,23 @@ class FlickrClient: NSObject {
                                     
                                     completionHandlerForFetchFlickrImages(false, "Oops! Download could not be handled: \(error!)")
                                     
+                                    return
+                                    
                                 } else {
-                                
+                                    
+                                    //
+                                    // observer for finished download step
+                                    //
+                                    
+                                    NotificationCenter.default.post(
+                                        name: NSNotification.Name(rawValue: self.appDelegate.pinPhotoDownloadedNotification),
+                                        object: nil,
+                                        userInfo: ["completed": index == maxPhotoIndex]
+                                    )
+                                    
                                     if self.debugMode == true {
                                         print ("--- photo object successfully persisted ---")
-                                        print ("    imageOrigin=\(imgDataOrigin!), imagePreview=\(imgDataPreview!)")
+                                        print ("    imageOrigin=\(imgDataOrigin!), imagePreview=\(imgDataPreview!), \(index) of \(maxPhotoIndex)")
                                     }
                                 }
                             }
