@@ -59,6 +59,27 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         photoCollectionView!.collectionViewLayout.invalidateLayout()
     }
     
+    func convertPhotoToPhotoCellObject(_ photo: Photo) -> PhotoCellObject {
+    
+        var UIImageOrigin: UIImage?
+        var UIImagePreview: UIImage?
+        
+        if let _imageOrigin = photo.imageRaw {
+            UIImageOrigin = UIImage(data: _imageOrigin, scale: 1.0)
+        }
+        
+        if let _imagePreview = photo.imagePreview {
+            UIImagePreview = UIImage(data: _imagePreview, scale: 1.0)
+        }
+        
+        return PhotoCellObject(
+            imageHash: photo.imageHash,
+            imageSourceURL: photo.imageSourceURL,
+            imageOrigin: UIImageOrigin,
+            imagePreview: UIImagePreview
+        )
+    }
+    
     func collectionViewSetup() {
     
         photoCollectionView.isHidden = false
@@ -74,26 +95,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
                 
                 self.photoDataObjects = photos!
                 for photo in self.photoDataObjects {
-                    
-                    var UIImageOrigin: UIImage?
-                    var UIImagePreview: UIImage?
-                    
-                    if let _imageOrigin = photo.imageRaw {
-                        UIImageOrigin = UIImage(data: _imageOrigin, scale: 1.0)
-                    }
-                    
-                    if let _imagePreview = photo.imagePreview {
-                        UIImagePreview = UIImage(data: _imagePreview, scale: 1.0)
-                    }
-                    
-                    let photoObject = PhotoCellObject(
-                        imageHash: photo.imageHash,
-                        imageSourceURL: photo.imageSourceURL,
-                        imageOrigin: UIImageOrigin,
-                        imagePreview: UIImagePreview
-                    )
-                    
-                    self.photoObjects.append(photoObject)
+                    self.photoObjects.append(self.convertPhotoToPhotoCellObject(photo))
                 }
                 
                 self.refreshCollectionView()
@@ -140,15 +142,27 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         
         let photo = photoObjects[indexPath.row]
         
+        //
+        // handle image for corresponding cell, try to load preview image first
+        // if no preview image found, take origin photo instead ... failsafe to
+        // sample/default image
+        //
+        
         if photo.imagePreview != nil {
+            
             cell.imageView.image = photo.imagePreview
             if appDebugMode { print ("using preview image for cel #\(indexPath.row)") }
+            
         } else if photo.imageOrigin != nil {
+            
             cell.imageView.image = photo.imageOrigin
             if appDebugMode { print ("using origin image for cel #\(indexPath.row)") }
+            
         } else {
+            
             cell.imageView.image = UIImage(named: "sample_image")
             if appDebugMode { print ("using sample image for cel #\(indexPath.row)") }
+            
         }
 
         cell.activityIndicator.stopAnimating()
@@ -231,10 +245,48 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         miniMapView.addAnnotation(pin)
     }
     
+    //
+    // IBAction Methods
+    //
+    
     @IBAction func btnReloadPhotoCollection(_ sender: Any) {
         
-        for photoObject in self.photoObjects {
-            print ("002 => \(photoObject.imageHash, photoObject.imageSourceURL)")
-        };  print ("---    ------------------------")
+        let alert = UIAlertController(
+            title: "Delete Collection",
+            message: "Do you really want to refresh this collection by loading new images?", preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "No, Cancel!", style: .default, handler: nil))
+        alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction) in
+            
+            self.deletePhotosOfCollectionByPin(self.pin) {
+                
+                (success, error) in
+                
+                if success! == true {
+                    
+                    self.flickrClient.getImagesByMapPin (self.pin!) {
+                        
+                        (success, error) in
+                        
+                        if success == false {
+                            
+                            self._handleErrorAsSimpleDialog("Error", error?.description ?? "unkown error occurred")
+                        
+                        } else {
+                        
+                            self.collectionViewSetup()
+                        }
+                    }
+                    
+                } else {
+                
+                    if self.appDebugMode { print (error ?? "unknown image deletion problem") }
+                
+                }
+            }
+        }))
+        
+        present(alert, animated: true, completion: nil)
     }
 }

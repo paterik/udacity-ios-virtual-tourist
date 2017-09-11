@@ -11,12 +11,44 @@ import CoreStore
 
 extension MapDetailViewController {
 
+    func cleanUpCollectionCache() {
+    
+        self.photoObjects.removeAll()
+        self.photoDataObjects.removeAll()
+    }
+    
+    func deletePhotosOfCollectionByPin (
+       _ pin: Pin,
+       _ completionHandlerForDeletePhotos: @escaping (_ success: Bool?, _ error: String?) -> Void) {
+    
+        cleanUpCollectionCache()
+        
+        CoreStore.perform(
+            
+            asynchronous: { (transaction) -> Void in
+                
+                transaction.deleteAll(From<Photo>(), Where("pin", isEqualTo: pin))
+            },
+            
+            success: { _ in
+        
+                completionHandlerForDeletePhotos(true, nil)
+            },
+            
+            failure: { (error) in
+                
+                completionHandlerForDeletePhotos(false, error.localizedDescription)
+                
+                return
+            }
+        )
+    }
+    
     func getPhotosForCollectionByPin (
        _ pin: Pin,
        _ completionHandlerForFetchPhotos: @escaping (_ photos: [Photo]?, _ success: Bool?, _ error: String?) -> Void) {
         
-        self.photoObjects.removeAll()
-        self.photoDataObjects.removeAll()
+        cleanUpCollectionCache()
         
         CoreStore.perform(
             

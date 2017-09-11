@@ -86,14 +86,6 @@ extension MapViewController {
     
     func _deletePin (_ targetPin: Pin!)  {
         
-        // load all corresponding photos ... (dev test)
-        
-        
-        /*let personJSON = CoreStore.queryAttributes(
-            From<Pin>(),
-            Select("metaHash", .count("photos", as: "photosAtPins"))
-        )*/
-        
         CoreStore.perform(
             asynchronous: { (transaction) -> Void in
                 
@@ -107,10 +99,6 @@ extension MapViewController {
                 self._pinSelected = nil
                 if self.appDebugMode == true {
                     print ("[_DEV_] \(targetPin.coordinate) deleted from persistance layer!")
-                    
-                    // check that corresponding photos deleted also
-                    
-                    
                 }
                 
             },
@@ -119,15 +107,12 @@ extension MapViewController {
                 return
             }
         )
-        
+
+        // check that corresponding photos deleted also
         if let photos = CoreStore.fetchAll(From<Photo>()) {
             print ("===============================")
             print ("\(photos.count) still available")
-            
-        } else {
-            print ("NO FOTOS FOUND :(")
         }
-
     }
     
     func _deleteAllPins() {
