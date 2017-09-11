@@ -10,7 +10,7 @@ def uiLibs
 end
 
 def baseLibs
-    pod 'CryptoSwift'
+    pod 'CryptoSwift', '<= 0.6.9'
     pod 'Kingfisher', '~> 3.0'
 end
 
