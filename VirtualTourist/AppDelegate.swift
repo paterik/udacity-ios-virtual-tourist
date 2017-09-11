@@ -13,6 +13,11 @@ import CoreStore
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
+    // single photo successfully downloaded notification tag
+    let pinPhotoDownloadedNotification = "pinPhotoDownloadedNotification"
+    // notification tag for photostack download completed (all photos finished)
+    let pinPhotoDownloadedCompleteNotification = "pinPhotoDownloadedCompleteNotification"
+    
     //
     // MARK: Variables (Intern)
     //
