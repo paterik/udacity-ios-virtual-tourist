@@ -19,7 +19,6 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
     @IBOutlet weak var btnBackToMapItem: UIBarButtonItem!
     @IBOutlet weak var miniMapView: MKMapView!
     @IBOutlet weak var photoCollectionView: UICollectionView!
-    @IBOutlet weak var lblNoImagesFound: UILabel!
     @IBOutlet weak var btnRefreshPhotosForThisLocation: UIBarButtonItem!
     @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
     
@@ -29,6 +28,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
     
     let mapPinIdentifier = "MiniMapPin"
     let mapPinImageName = "icnMapPin_v2"
+    let mapNoPhotosInfoLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
     let collectionViewCellIdentifier = "flickrCell"
     let flickrClient = FlickrClient.sharedInstance
     
@@ -49,6 +49,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         super.viewDidLoad()
         
         mapSetup()
+        loadViewAdditions()
         collectionViewSetup()
     }
     
@@ -85,7 +86,6 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         photoCollectionView.isHidden = false
         photoCollectionView.delegate = self
         photoCollectionView.dataSource = self
-        lblNoImagesFound.isHidden = true
         
         getPhotosForCollectionByPin(pin) {
         
@@ -93,9 +93,12 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         
             if success! == true {
                 
-                self.photoDataObjects = photos!
-                for photo in self.photoDataObjects {
-                    self.photoObjects.append(self.convertPhotoToPhotoCellObject(photo))
+                if photos != nil {
+                    
+                    self.photoDataObjects = photos!
+                    for photo in self.photoDataObjects {
+                        self.photoObjects.append(self.convertPhotoToPhotoCellObject(photo))
+                    }
                 }
                 
                 self.refreshCollectionView()

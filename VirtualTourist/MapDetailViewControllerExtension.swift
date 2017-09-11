@@ -11,6 +11,24 @@ import CoreStore
 
 extension MapDetailViewController {
 
+    func loadViewAdditions() {
+        
+        mapNoPhotosInfoLabel.backgroundColor = UIColor(netHex: 0xEC2C61)
+        mapNoPhotosInfoLabel.textColor = UIColor(netHex: 0xFFFFFF)
+        mapNoPhotosInfoLabel.textAlignment = .center
+        mapNoPhotosInfoLabel.text = "There are no photoa available for this location"
+        mapNoPhotosInfoLabel.isEnabled = false
+        mapNoPhotosInfoLabel.isHidden = true
+        
+        view.addSubview(mapNoPhotosInfoLabel)
+        
+        mapNoPhotosInfoLabel.snp.makeConstraints { (make) -> Void in
+            make.height.equalTo(50)
+            make.width.equalTo(self.view)
+            make.bottom.equalTo(bottomLayoutGuide.snp.top).offset(-44)
+        }
+    }
+    
     func cleanUpCollectionCache() {
     
         self.photoObjects.removeAll()
@@ -60,7 +78,7 @@ extension MapDetailViewController {
             success: { (transactionPhotos) in
                 
                 if transactionPhotos?.isEmpty == true {
-                    completionHandlerForFetchPhotos(nil, false, "Oops! No photos found for this location ...")
+                    completionHandlerForFetchPhotos(nil, true, "Warning! No images found for this location ...")
                 }   else {
                     completionHandlerForFetchPhotos(transactionPhotos!, true, nil)
                 }
@@ -77,8 +95,15 @@ extension MapDetailViewController {
     func refreshCollectionView() {
         
         if isDataAvailable() {
+            
+            if appDebugMode { print ("-> reload image data") }
             photoCollectionView?.reloadData()
-            print ("-> reload image data")
+            
+        } else {
+        
+            if appDebugMode { print ("-> no image data available") }
+            mapNoPhotosInfoLabel.isEnabled = true
+            mapNoPhotosInfoLabel.isHidden = false
         }
     }
     

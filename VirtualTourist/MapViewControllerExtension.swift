@@ -76,7 +76,6 @@ extension MapViewController {
             make.width.equalTo(self.view)
             make.bottom.equalTo(bottomLayoutGuide.snp.top)
         }
-        
     }
     
     func _getAllPins() -> [Pin]? {

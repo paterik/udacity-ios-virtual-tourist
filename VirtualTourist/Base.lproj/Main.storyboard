@@ -137,41 +137,28 @@
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="xaE-v0-ope"/>
                                 </items>
                             </toolbar>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="I've found no images for this location" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6Oz-rc-fb4">
-                                <rect key="frame" x="0.0" y="572" width="375" height="50"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="50" id="M7j-jM-1Ep"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" red="0.29098954799999999" green="0.44713512059999999" blue="0.66605633500000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="0wd-Th-j40" secondAttribute="trailing" id="5Xl-ik-Jch"/>
-                            <constraint firstItem="6Oz-rc-fb4" firstAttribute="trailing" secondItem="FNY-Ha-Iwr" secondAttribute="trailing" id="60b-aZ-VjB"/>
-                            <constraint firstItem="7JT-6f-jS9" firstAttribute="leading" secondItem="6Oz-rc-fb4" secondAttribute="leading" id="GiY-OY-giO"/>
+                            <constraint firstItem="7JT-6f-jS9" firstAttribute="trailing" secondItem="FNY-Ha-Iwr" secondAttribute="trailing" id="KCD-vg-sij"/>
                             <constraint firstItem="0wd-Th-j40" firstAttribute="trailing" secondItem="Pq4-40-MSw" secondAttribute="trailing" id="MJY-mS-Xzu"/>
-                            <constraint firstItem="FNY-Ha-Iwr" firstAttribute="top" secondItem="6Oz-rc-fb4" secondAttribute="bottom" constant="1" id="TSx-Kk-YI4"/>
                             <constraint firstItem="7JT-6f-jS9" firstAttribute="top" secondItem="Pq4-40-MSw" secondAttribute="bottom" id="Uun-oC-u0E"/>
                             <constraint firstItem="0wd-Th-j40" firstAttribute="top" secondItem="qvG-Hu-zpe" secondAttribute="topMargin" constant="17" id="efP-On-Y4q"/>
-                            <constraint firstItem="6Oz-rc-fb4" firstAttribute="leading" secondItem="FNY-Ha-Iwr" secondAttribute="leading" id="flX-nL-KIx"/>
-                            <constraint firstItem="Pq4-40-MSw" firstAttribute="trailing" secondItem="6Oz-rc-fb4" secondAttribute="trailing" id="huY-Q7-iQ6"/>
-                            <constraint firstItem="7JT-6f-jS9" firstAttribute="trailing" secondItem="6Oz-rc-fb4" secondAttribute="trailing" id="iJT-4a-WFk"/>
+                            <constraint firstItem="7JT-6f-jS9" firstAttribute="leading" secondItem="FNY-Ha-Iwr" secondAttribute="leading" id="g3M-xK-QGa"/>
                             <constraint firstItem="FNY-Ha-Iwr" firstAttribute="top" secondItem="7JT-6f-jS9" secondAttribute="bottom" id="ijT-5h-N7T"/>
-                            <constraint firstItem="Pq4-40-MSw" firstAttribute="leading" secondItem="6Oz-rc-fb4" secondAttribute="leading" id="juX-xa-4FS"/>
                             <constraint firstItem="Pq4-40-MSw" firstAttribute="top" secondItem="0wd-Th-j40" secondAttribute="bottom" id="kXb-H1-R6d"/>
+                            <constraint firstItem="7JT-6f-jS9" firstAttribute="trailing" secondItem="Pq4-40-MSw" secondAttribute="trailing" id="m1K-Vn-pbi"/>
                             <constraint firstItem="FNY-Ha-Iwr" firstAttribute="bottom" secondItem="j7L-Tz-Bqk" secondAttribute="top" id="oUz-Qi-YIY"/>
                             <constraint firstItem="0wd-Th-j40" firstAttribute="leading" secondItem="qvG-Hu-zpe" secondAttribute="leading" id="ta0-sb-yXS"/>
                             <constraint firstItem="0wd-Th-j40" firstAttribute="leading" secondItem="Pq4-40-MSw" secondAttribute="leading" id="uge-Uv-CWO"/>
+                            <constraint firstItem="7JT-6f-jS9" firstAttribute="leading" secondItem="Pq4-40-MSw" secondAttribute="leading" id="wjo-IR-J9X"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="btnBackToMapItem" destination="bMJ-M9-N9I" id="Tt7-ic-R0L"/>
                         <outlet property="btnRefreshPhotosForThisLocation" destination="HGA-pD-07f" id="9jl-EE-WOv"/>
                         <outlet property="flowLayout" destination="AV2-vo-SDq" id="gwW-ex-Jce"/>
-                        <outlet property="lblNoImagesFound" destination="6Oz-rc-fb4" id="qVl-oS-JKM"/>
                         <outlet property="miniMapView" destination="Pq4-40-MSw" id="ldH-aR-qj1"/>
                         <outlet property="photoCollectionView" destination="7JT-6f-jS9" id="j7u-Zi-yh7"/>
                     </connections>
