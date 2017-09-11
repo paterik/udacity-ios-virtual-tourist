@@ -48,9 +48,18 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         
         super.viewDidLoad()
         
-        mapSetup()
+        setupUIMap()
+        setupUICollectionView()
+        
         loadViewAdditions()
-        collectionViewSetup()
+        loadPhotosForCollectionView(nil)
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(MapDetailViewController.loadPhotosForCollectionView),
+            name: NSNotification.Name(rawValue: appDelegate.pinPhotoDownloadedNotification),
+            object: nil
+        )
     }
     
     override func willRotate(
@@ -58,70 +67,6 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         duration: TimeInterval) {
         
         photoCollectionView!.collectionViewLayout.invalidateLayout()
-    }
-    
-    func convertPhotoToPhotoCellObject(_ photo: Photo) -> PhotoCellObject {
-    
-        var UIImageOrigin: UIImage?
-        var UIImagePreview: UIImage?
-        
-        if let _imageOrigin = photo.imageRaw {
-            UIImageOrigin = UIImage(data: _imageOrigin, scale: 1.0)
-        }
-        
-        if let _imagePreview = photo.imagePreview {
-            UIImagePreview = UIImage(data: _imagePreview, scale: 1.0)
-        }
-        
-        return PhotoCellObject(
-            imageHash: photo.imageHash,
-            imageSourceURL: photo.imageSourceURL,
-            imageOrigin: UIImageOrigin,
-            imagePreview: UIImagePreview
-        )
-    }
-    
-    func collectionViewSetup() {
-    
-        photoCollectionView.isHidden = false
-        photoCollectionView.delegate = self
-        photoCollectionView.dataSource = self
-        
-        getPhotosForCollectionByPin(pin) {
-        
-            (photos, success, error) in
-        
-            if success! == true {
-                
-                if photos != nil {
-                    
-                    self.photoDataObjects = photos!
-                    for photo in self.photoDataObjects {
-                        self.photoObjects.append(self.convertPhotoToPhotoCellObject(photo))
-                    }
-                }
-                
-                self.refreshCollectionView()
-                
-            } else {
-                
-                if self.appDebugMode { print (error ?? "unknown image handler problem") }
-            }
-        }
-    }
-    
-    override func didReceiveMemoryWarning() {
-        
-        super.didReceiveMemoryWarning()
-    }
-    
-    //
-    // MARK: IBAction Methods
-    //
-    
-    @IBAction func btnBackToMapAction(_ sender: Any) {
-    
-        dismiss(animated: true, completion: nil)
     }
     
     //
@@ -165,9 +110,9 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
             
             cell.imageView.image = UIImage(named: "sample_image")
             if appDebugMode { print ("using sample image for cel #\(indexPath.row)") }
-            
-        }
 
+        }
+        
         cell.activityIndicator.stopAnimating()
         cell.activityIndicator.isHidden = true
         
@@ -201,7 +146,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         return CGSize(
             width: collectionCellWidth,
             height: collectionCellHeight
-        );
+        )
     }
     
     //
@@ -233,30 +178,23 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
     }
     
     //
-    // MARK: MapView Helper Methods
+    // MARK: IBAction Methods
     //
     
-    func mapSetup() {
+    @IBAction func btnBackToMapAction(_ sender: Any) {
         
-        // @todo (v1.0.n): move this as property pack deep inside the corresponding PIN entity
-        let pinCenter = CLLocationCoordinate2D(latitude: pin.coordinate.latitude, longitude: pin.coordinate.longitude)
-        let pinRegion = MKCoordinateRegion(center: pinCenter, span: MKCoordinateSpan(latitudeDelta: 0.375, longitudeDelta: 0.375))
-
-        miniMapView.delegate = self
-        miniMapView.setRegion(pinRegion, animated: true)
-        miniMapView.setCenter(pin.coordinate, animated: true)
-        miniMapView.addAnnotation(pin)
+        dismiss(animated: true, completion: nil)
     }
-    
-    //
-    // IBAction Methods
-    //
     
     @IBAction func btnReloadPhotoCollection(_ sender: Any) {
         
+        // deactivate reload collection button
+        toggleRefreshCollectionButton(false)
+        
         let alert = UIAlertController(
             title: "Delete Collection",
-            message: "Do you really want to refresh this collection by loading new images?", preferredStyle: .alert
+            message: "Do you really want to refresh this collection by loading new images?",
+            preferredStyle: .alert
         )
         
         alert.addAction(UIAlertAction(title: "No, Cancel!", style: .default, handler: nil))
@@ -266,26 +204,24 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
                 
                 (success, error) in
                 
-                if success! == true {
+                // delete successfully done?
+                if error == nil {
                     
+                    // load new imageSet using flickr api call
                     self.flickrClient.getImagesByMapPin (self.pin!) {
                         
                         (success, error) in
                         
-                        if success == false {
+                        if success == false || error != nil {
                             
                             self._handleErrorAsSimpleDialog("Error", error?.description ?? "unkown error occurred")
                         
-                        } else {
-                        
-                            self.collectionViewSetup()
                         }
                     }
                     
                 } else {
                 
                     if self.appDebugMode { print (error ?? "unknown image deletion problem") }
-                
                 }
             }
         }))

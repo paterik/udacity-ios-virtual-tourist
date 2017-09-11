@@ -8,15 +8,19 @@
 
 import Foundation
 import CoreStore
+import UIKit
+import MapKit
 
 extension MapDetailViewController {
 
     func loadViewAdditions() {
         
+        btnRefreshPhotosForThisLocation.isEnabled = true
+        
+        mapNoPhotosInfoLabel.text = "There are no photoa available for this location"
         mapNoPhotosInfoLabel.backgroundColor = UIColor(netHex: 0xEC2C61)
         mapNoPhotosInfoLabel.textColor = UIColor(netHex: 0xFFFFFF)
         mapNoPhotosInfoLabel.textAlignment = .center
-        mapNoPhotosInfoLabel.text = "There are no photoa available for this location"
         mapNoPhotosInfoLabel.isEnabled = false
         mapNoPhotosInfoLabel.isHidden = true
         
@@ -31,16 +35,15 @@ extension MapDetailViewController {
     
     func cleanUpCollectionCache() {
     
-        self.photoObjects.removeAll()
-        self.photoDataObjects.removeAll()
+        photoObjects.removeAll()
+        photoDataObjects.removeAll()
+        photoCollectionView?.reloadData()
     }
     
     func deletePhotosOfCollectionByPin (
        _ pin: Pin,
        _ completionHandlerForDeletePhotos: @escaping (_ success: Bool?, _ error: String?) -> Void) {
     
-        cleanUpCollectionCache()
-        
         CoreStore.perform(
             
             asynchronous: { (transaction) -> Void in
@@ -49,7 +52,8 @@ extension MapDetailViewController {
             },
             
             success: { _ in
-        
+                
+                self.cleanUpCollectionCache()
                 completionHandlerForDeletePhotos(true, nil)
             },
             
@@ -66,8 +70,6 @@ extension MapDetailViewController {
        _ pin: Pin,
        _ completionHandlerForFetchPhotos: @escaping (_ photos: [Photo]?, _ success: Bool?, _ error: String?) -> Void) {
         
-        cleanUpCollectionCache()
-        
         CoreStore.perform(
             
             asynchronous: { (transaction) -> [Photo]? in
@@ -77,19 +79,112 @@ extension MapDetailViewController {
             
             success: { (transactionPhotos) in
                 
+                self.cleanUpCollectionCache()
+                
                 if transactionPhotos?.isEmpty == true {
+                    
                     completionHandlerForFetchPhotos(nil, true, "Warning! No images found for this location ...")
-                }   else {
+                    
+                }  else {
+                    
                     completionHandlerForFetchPhotos(transactionPhotos!, true, nil)
+                    
                 }
             },
             
             failure: { (error) in
                 
                 completionHandlerForFetchPhotos(nil, false, error.localizedDescription)
-                return
             }
         )
+    }
+    
+    func convertPhotoToPhotoCellObject(_ photo: Photo) -> PhotoCellObject {
+        
+        var UIImageOrigin: UIImage?
+        var UIImagePreview: UIImage?
+        
+        if let _imageOrigin = photo.imageRaw {
+            UIImageOrigin = UIImage(data: _imageOrigin, scale: 1.0)
+        }
+        
+        if let _imagePreview = photo.imagePreview {
+            UIImagePreview = UIImage(data: _imagePreview, scale: 1.0)
+        }
+        
+        return PhotoCellObject(
+            imageHash: photo.imageHash,
+            imageSourceURL: photo.imageSourceURL,
+            imageOrigin: UIImageOrigin,
+            imagePreview: UIImagePreview
+        )
+    }
+    
+    func setupUICollectionView() {
+        
+        photoCollectionView.isHidden = false
+        photoCollectionView.delegate = self
+        photoCollectionView.dataSource = self
+    }
+    
+    func setupUIMap() {
+        
+        // @todo (v1.0.n): move this as property pack deep inside the corresponding PIN entity
+        let pinCenter = CLLocationCoordinate2D(latitude: pin.coordinate.latitude, longitude: pin.coordinate.longitude)
+        let pinRegion = MKCoordinateRegion(center: pinCenter, span: MKCoordinateSpan(latitudeDelta: 0.375, longitudeDelta: 0.375))
+        
+        miniMapView.delegate = self
+        miniMapView.setRegion(pinRegion, animated: true)
+        miniMapView.setCenter(pin.coordinate, animated: true)
+        miniMapView.addAnnotation(pin)
+    }
+    
+    func handleLastPhotoTransfered(_ notification: NSNotification?) {
+    
+        if notification == nil { return }
+        
+        if let userInfo = notification!.userInfo as? [String: Bool]
+        {
+            pin.isDownloading = true
+            
+            if let completed = userInfo["completed"] {
+                if completed == true {
+                    pin.isDownloading = false
+                    toggleRefreshCollectionButton(true)
+                }
+            }
+        }
+    }
+    
+    func loadPhotosForCollectionView(_ notification: NSNotification?) {
+        
+        getPhotosForCollectionByPin(pin) {
+            
+            (photos, success, error) in
+            
+            if success == true {
+                
+                if photos != nil {
+                    
+                    self.photoDataObjects = photos!
+                    for photo in self.photoDataObjects {
+                        self.photoObjects.append(self.convertPhotoToPhotoCellObject(photo))
+                    }
+                }
+                
+                self.handleLastPhotoTransfered(notification)
+                self.refreshCollectionView()
+                
+            } else {
+                
+                if self.appDebugMode { print (error ?? "unknown image handler problem") }
+            }
+        }
+    }
+    
+    func toggleRefreshCollectionButton(_ enabled: Bool) {
+        
+        btnRefreshPhotosForThisLocation.isEnabled = enabled
     }
     
     func refreshCollectionView() {
