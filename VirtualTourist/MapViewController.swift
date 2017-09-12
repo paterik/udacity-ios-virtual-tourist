@@ -22,7 +22,12 @@ class MapViewController: BaseController, MKMapViewDelegate {
     @IBOutlet weak var btnEditModeItem: UIBarButtonItem!
     
     //
-    // MARK: Class Constants
+    // MARK: Class Special Constants
+    //
+    let flickrClient = FlickrClient.sharedInstance
+    
+    //
+    // MARK: Class Basic Constants
     //
     
     let mapLongPressDuration = 0.875
@@ -31,7 +36,6 @@ class MapViewController: BaseController, MKMapViewDelegate {
     let mapPinNewAddedImageName = "icnMapPin_v2"
     let mapPinIncompleteImageName = "icnMapPin_v3"
     let mapEditModeInfoLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
-    let flickrClient = FlickrClient.sharedInstance
     
     //
     // MARK: Class Variables
@@ -60,8 +64,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
         loadMapAnnotations()
         loadMapAdditions()
         
-        NotificationCenter.default.addObserver(
-            self,
+        NotificationCenter.default.addObserver(self,
             selector: #selector(MapViewController.handleLastPhotoTransfered),
             name: NSNotification.Name(rawValue: appDelegate.pinPhotoDownloadedNotification),
             object: nil

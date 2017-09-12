@@ -23,14 +23,19 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
     @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
     
     //
-    // MARK: Class Constants
+    // MARK: Class Special Constants
+    //
+    
+    let flickrClient = FlickrClient.sharedInstance
+    
+    //
+    // MARK: Class Basic Constants
     //
     
     let mapPinIdentifier = "MiniMapPin"
     let mapPinImageName = "icnMapPin_v2"
     let mapNoPhotosInfoLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
     let collectionViewCellIdentifier = "flickrCell"
-    let flickrClient = FlickrClient.sharedInstance
     
     //
     // MARK: Class Variables
@@ -54,8 +59,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         loadViewAdditions()
         loadPhotosForCollectionView(nil)
         
-        NotificationCenter.default.addObserver(
-            self,
+        NotificationCenter.default.addObserver(self,
             selector: #selector(MapDetailViewController.loadPhotosForCollectionView),
             name: NSNotification.Name(rawValue: appDelegate.pinPhotoDownloadedNotification),
             object: nil
@@ -93,7 +97,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         //
         // handle image for corresponding cell, try to load preview image first
         // if no preview image found, take origin photo instead ... failsafe to
-        // sample/default image
+        // sample/default image (will be simplified in future version)
         //
         
         if photo.imagePreview != nil {
@@ -113,6 +117,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
 
         }
         
+        // weazL: download indicator problem seems to be placed here
         cell.activityIndicator.stopAnimating()
         cell.activityIndicator.isHidden = true
         
@@ -128,11 +133,11 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         var collectionCellHeight: CGFloat!
         var collectionCellPadding: CGFloat = 12.0
         var collectionCellSpacing: CGFloat = 8.0
-        var numberOfCellInRow: CGFloat = 2.0
+        var numberOfCellInRow: CGFloat = 3.0
         
         if UIApplication.shared.statusBarOrientation != UIInterfaceOrientation.portrait {
-            numberOfCellInRow = 3.0
-            collectionCellPadding = 8.0
+            numberOfCellInRow = 4.0
+            collectionCellPadding = 10.0
             collectionCellSpacing = 4.0
         }
         
@@ -188,7 +193,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
     
     @IBAction func btnReloadPhotoCollection(_ sender: Any) {
         
-        // deactivate reload collection button
+        // deactivate reload collection button after action call
         toggleRefreshCollectionButton(false)
         
         let alert = UIAlertController(
@@ -218,10 +223,6 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
                         
                         }
                     }
-                    
-                } else {
-                
-                    if self.appDebugMode { print (error ?? "unknown image deletion problem") }
                 }
             }
         }))

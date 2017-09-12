@@ -114,10 +114,8 @@
 			isa = PBXGroup;
 			children = (
 				B12BCA031F4C7E630037A359 /* base */,
-				B12BCA041F4C7E680037A359 /* protocol */,
 				B12BCA051F4C7E720037A359 /* locationMapView */,
 				B12BCA061F4C7E960037A359 /* photoAlbumView */,
-				B12BCA071F4C7E9F0037A359 /* appConfigView */,
 			);
 			name = controller;
 			sourceTree = "<group>";
@@ -209,13 +207,6 @@
 			name = base;
 			sourceTree = "<group>";
 		};
-		B12BCA041F4C7E680037A359 /* protocol */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = protocol;
-			sourceTree = "<group>";
-		};
 		B12BCA051F4C7E720037A359 /* locationMapView */ = {
 			isa = PBXGroup;
 			children = (
@@ -232,13 +223,6 @@
 				B1AC4CE31F52F8730032C590 /* MapDetailViewController.swift */,
 			);
 			name = photoAlbumView;
-			sourceTree = "<group>";
-		};
-		B12BCA071F4C7E9F0037A359 /* appConfigView */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = appConfigView;
 			sourceTree = "<group>";
 		};
 		B12BCA081F4C80CA0037A359 /* data */ = {
