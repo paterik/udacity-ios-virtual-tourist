@@ -122,7 +122,8 @@ class FlickrClient: NSObject {
                         if (error != nil) { completionHandlerForFetchFlickrImages(false, error); return }
                     }
                     
-                    // start dispatched download process, image processsing and coreData/coreStock handling of resulting photos
+                    // start dispatched download process, including image processsing and coreData/
+                    // coreStock handling of api fetch resulting photos
                     DispatchQueue.main.async(execute: {
                         
                         let maxPhotoIndex = photoResultArray.count - 1
@@ -140,10 +141,7 @@ class FlickrClient: NSObject {
                                     
                                 } else {
                                     
-                                    //
-                                    // observer for finished download step
-                                    //
-                                    
+                                    // notification push for single finished download step (used in locationMapView/photoAlbumView)
                                     NotificationCenter.default.post(
                                         name: NSNotification.Name(rawValue: self.appDelegate.pinPhotoDownloadedNotification),
                                         object: nil,

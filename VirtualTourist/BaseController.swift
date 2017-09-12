@@ -13,7 +13,7 @@ import YNDropDownMenu
 class BaseController: UIViewController {
     
     //
-    // MARK: Constants (Normal)
+    // MARK: Base Constants
     //
     
     let appDebugMode: Bool = true
@@ -21,7 +21,7 @@ class BaseController: UIViewController {
     let metaDateTimeFormat = "dd.MM.Y hh:mm"
     
     //
-    // MARK: Variables
+    // MARK: Base Variables
     //
     
     var appMenu: YNDropDownMenu?
