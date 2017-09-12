@@ -139,9 +139,9 @@ extension MapDetailViewController {
         miniMapView.addAnnotation(pin)
     }
     
-    func handleLastPhotoTransfered(_ notification: NSNotification?) {
+    func validateLastPhotoTransfered(_ notification: NSNotification?) -> Bool {
     
-        if notification == nil { return }
+        if notification == nil { return false }
         
         if let userInfo = notification!.userInfo as? [String: Bool]
         {
@@ -151,34 +151,47 @@ extension MapDetailViewController {
                 if completed == true {
                     pin.isDownloading = false
                     toggleRefreshCollectionButton(true)
+                    
+                    return true
                 }
             }
         }
+        
+        return false
     }
     
     func loadPhotosForCollectionView(_ notification: NSNotification?) {
         
-        getPhotosForCollectionByPin(pin) {
+        // handle normal photo collectionView for persisted locations
+        if pin.photos.count > 0 {
             
-            (photos, success, error) in
-            
-            if success == true {
+            getPhotosForCollectionByPin(pin) {
                 
-                if photos != nil {
+                (photos, success, error) in
+                
+                if success == true {
                     
-                    self.photoDataObjects = photos!
-                    for photo in self.photoDataObjects {
-                        self.photoObjects.append(self.convertPhotoToPhotoCellObject(photo))
+                    if photos != nil {
+                        
+                        self.photoDataObjects = photos!
+                        for photo in self.photoDataObjects {
+                            self.photoObjects.append(self.convertPhotoToPhotoCellObject(photo))
+                        }
                     }
+                    
+                    let _ = self.validateLastPhotoTransfered(notification)
+                    self.refreshCollectionView()
+                    
+                } else {
+                    
+                    if self.appDebugMode { print (error ?? "unknown image handler problem") }
                 }
-                
-                self.handleLastPhotoTransfered(notification)
-                self.refreshCollectionView()
-                
-            } else {
-                
-                if self.appDebugMode { print (error ?? "unknown image handler problem") }
             }
+            
+        // handle empy locations, set placeholders
+            
+        } else {
+            
         }
     }
     
