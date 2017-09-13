@@ -12,32 +12,35 @@ import UIKit
 import MapKit
 
 extension MapDetailViewController {
-
-    func loadViewAdditions() {
-        
-        btnRefreshPhotosForThisLocation.isEnabled = true
-        
-        mapNoPhotosInfoLabel.text = "There are no photoa available for this location"
-        mapNoPhotosInfoLabel.backgroundColor = UIColor(netHex: 0xEC2C61)
-        mapNoPhotosInfoLabel.textColor = UIColor(netHex: 0xFFFFFF)
-        mapNoPhotosInfoLabel.textAlignment = .center
-        mapNoPhotosInfoLabel.isEnabled = false
-        mapNoPhotosInfoLabel.isHidden = true
-        
-        view.addSubview(mapNoPhotosInfoLabel)
-        
-        mapNoPhotosInfoLabel.snp.makeConstraints { (make) -> Void in
-            make.height.equalTo(50)
-            make.width.equalTo(self.view)
-            make.bottom.equalTo(bottomLayoutGuide.snp.top).offset(-44)
-        }
-    }
     
     func cleanUpCollectionCache() {
     
         photoObjects.removeAll()
         photoDataObjects.removeAll()
+        photoCellIndexRefreshed = 0
+        
+        // prepare image cache for the number of photos previously persisted for this pin
+        addCollectionPlaceHolderPhotos(photoCellIndexOldTreshold)
+        
+        // reload collectionView to show/refresh items
         photoCollectionView?.reloadData()
+    }
+    
+    func addCollectionPlaceHolderPhotos(_ number: Int) {
+
+        // reset async photo download/processing counter
+        appDelegate.pinPhotosCurrentlyDownloaded = 0
+        
+        // build placeholder imageStack after cleanUp old (real) image collection(s)
+        for index in 0 ... number - 1  {
+            self.photoObjects.append(PhotoCellObject(
+                imageHash: "\(index)".md5(),
+                imageSourceURL: "\(index)",
+                imageOrigin: UIImage(named: "imgPhotoPlaceholder_v1"),
+                imagePreview: nil,
+                isPlaceHolder: true
+            ))
+        }
     }
     
     func deletePhotosOfCollectionByPin (
@@ -53,7 +56,6 @@ extension MapDetailViewController {
             
             success: { _ in
                 
-                self.cleanUpCollectionCache()
                 completionHandlerForDeletePhotos(true, nil)
             },
             
@@ -67,19 +69,16 @@ extension MapDetailViewController {
     }
     
     func getPhotosForCollectionByPin (
-       _ pin: Pin,
        _ completionHandlerForFetchPhotos: @escaping (_ photos: [Photo]?, _ success: Bool?, _ error: String?) -> Void) {
         
         CoreStore.perform(
             
             asynchronous: { (transaction) -> [Photo]? in
                 
-                return transaction.fetchAll(From<Photo>(), Where("pin", isEqualTo: pin))
+                return transaction.fetchAll(From<Photo>(), Where("pin", isEqualTo: self.pin))
             },
             
             success: { (transactionPhotos) in
-                
-                self.cleanUpCollectionCache()
                 
                 if transactionPhotos?.isEmpty == true {
                     
@@ -116,7 +115,8 @@ extension MapDetailViewController {
             imageHash: photo.imageHash,
             imageSourceURL: photo.imageSourceURL,
             imageOrigin: UIImageOrigin,
-            imagePreview: UIImagePreview
+            imagePreview: UIImagePreview,
+            isPlaceHolder: false
         )
     }
     
@@ -129,7 +129,6 @@ extension MapDetailViewController {
     
     func setupUIMap() {
         
-        // @todo (v1.0.n): move this as property pack deep inside the corresponding PIN entity
         let pinCenter = CLLocationCoordinate2D(latitude: pin.coordinate.latitude, longitude: pin.coordinate.longitude)
         let pinRegion = MKCoordinateRegion(center: pinCenter, span: MKCoordinateSpan(latitudeDelta: 0.375, longitudeDelta: 0.375))
         
@@ -139,60 +138,143 @@ extension MapDetailViewController {
         miniMapView.addAnnotation(pin)
     }
     
-    func validateLastPhotoTransfered(_ notification: NSNotification?) -> Bool {
+    func getIndexOfDownloadedPhoto(_ notification: NSNotification?) -> Int {
     
-        if notification == nil { return false }
+        if notification == nil { return -1 }
         
-        if let userInfo = notification!.userInfo as? [String: Bool]
+        if let userInfo = notification!.userInfo as? [String: Any]
         {
-            pin.isDownloading = true
-            
-            if let completed = userInfo["completed"] {
-                if completed == true {
-                    pin.isDownloading = false
-                    toggleRefreshCollectionButton(true)
-                    
-                    return true
-                }
+            if let refreshedIndex = userInfo["indexCurrent"] {
+                
+                return refreshedIndex as! Int
             }
         }
         
-        return false
+        return 0
     }
+    
+    func getMaxIndexOfCurrentDownloadSession(_ notification: NSNotification?) -> Int {
+        
+        if notification == nil { return -1 }
+        
+        if let userInfo = notification!.userInfo as? [String: Any]
+        {
+            if let refreshedIndex = userInfo["indexMax"] {
+                
+                return refreshedIndex as! Int
+            }
+        }
+        
+        return 0
+    }
+
     
     func loadPhotosForCollectionView(_ notification: NSNotification?) {
         
-        // handle normal photo collectionView for persisted locations
-        if pin.photos.count > 0 {
-            
-            getPhotosForCollectionByPin(pin) {
+        getPhotosForCollectionByPin() {
                 
-                (photos, success, error) in
+            (photos, success, error) in
                 
-                if success == true {
+            if success == true {
                     
-                    if photos != nil {
+                if photos != nil {
                         
-                        self.photoDataObjects = photos!
+                    self.photoDataObjects = photos!
+                    
+                    if notification == nil {
+                        
+                        // remove complete placeholder imageStack
+                        self.photoObjects.removeAll()
                         for photo in self.photoDataObjects {
                             self.photoObjects.append(self.convertPhotoToPhotoCellObject(photo))
                         }
+                    
+                    } else {
+                        
+                        // check old photo number threshold and extend placeholder stack if necessary
+                        self.mapNoPhotosInfoLabel.text = self.mapMsgPhotosInDownload
+                        self.mapNoPhotosInfoLabel.backgroundColor = UIColor(netHex: 0x23A7CE)
+                        
+                        self.photoCellIndexNewTreshold = self.getMaxIndexOfCurrentDownloadSession(notification)
+                        if (self.photoCellIndexOldTreshold != self.photoCellIndexNewTreshold) && self.photoCellIndexFixed == false {
+                            
+                            if self.appDebugMode {
+                                print ("--> detected treshold missmatch (\(self.photoCellIndexNewTreshold) vs \(self.photoCellIndexOldTreshold) photos)")
+                            }
+                            
+                            self.addCollectionPlaceHolderPhotos(self.photoCellIndexNewTreshold - self.photoCellIndexOldTreshold)
+                            self.photoCellIndexFixed = true
+                        }
+                        
+                        // replace placeholder imageStack (step wise)
+                        let  photoCellObject: PhotoCellObject = self.convertPhotoToPhotoCellObject(self.photoDataObjects[self.photoCellIndexRefreshed])
+                        self.photoObjects[self.photoCellIndexRefreshed] = photoCellObject
+                        self.photoCellIndexRefreshed += 1
+                        
+                        if self.appDelegate.pinPhotosCurrentlyDownloaded == self.photoCellIndexNewTreshold {
+                            
+                            print ("")
+                            print ("!!!!!!!!!!!!!!!!!")
+                            print ("!!! COMPLETED !!!")
+                            print ("!!!!!!!!!!!!!!!!!")
+                            print ("")
+                            
+                            self.pin.isDownloading = false
+                            self.toggleRefreshCollectionButton(true)
+                            self.toggleNoPhotosFoundInfoBox(false)
+                            
+                            // self.cleanUpCollectionViewCache()
+                            // self.refreshCollectionView()
+                        }
                     }
+                }
+                
+                self.refreshCollectionView()
                     
-                    let _ = self.validateLastPhotoTransfered(notification)
-                    self.refreshCollectionView()
+            } else {
                     
-                } else {
-                    
-                    if self.appDebugMode { print (error ?? "unknown image handler problem") }
+                if self.appDebugMode { print (error ?? "unknown image handler problem") }
+            }
+        }
+    }
+    
+    func cleanUpCollectionViewCache() {
+    
+        print ("===> cleanUp collectionView ...")
+        for (index, photo) in photoObjects.enumerated() {
+            if photo.isPlaceHolder {
+                print ("===> photo #\(index) of db_max:\(photoDataObjects.count) and preview_max:\(photoObjects.count) is bad <===")
+                if index <= self.photoObjects.count {
+                    photoObjects.remove(at: index)
                 }
             }
-            
-        // handle empy locations, set placeholders
-            
-        } else {
-            
         }
+    }
+    
+    func loadViewAdditions() {
+        
+        btnRefreshPhotosForThisLocation.isEnabled = true
+        
+        mapNoPhotosInfoLabel.text = mapMsgNoPhotosAvailable
+        mapNoPhotosInfoLabel.backgroundColor = UIColor(netHex: 0xEC2C61)
+        mapNoPhotosInfoLabel.textColor = UIColor(netHex: 0xFFFFFF)
+        mapNoPhotosInfoLabel.textAlignment = .center
+        mapNoPhotosInfoLabel.isEnabled = false
+        mapNoPhotosInfoLabel.isHidden = true
+        
+        view.addSubview(mapNoPhotosInfoLabel)
+        
+        mapNoPhotosInfoLabel.snp.makeConstraints { (make) -> Void in
+            make.height.equalTo(50)
+            make.width.equalTo(self.view)
+            make.bottom.equalTo(bottomLayoutGuide.snp.top).offset(-44)
+        }
+    }
+    
+    func toggleNoPhotosFoundInfoBox(_ enabled: Bool) {
+        
+        mapNoPhotosInfoLabel.isEnabled = enabled
+        mapNoPhotosInfoLabel.isHidden = !enabled
     }
     
     func toggleRefreshCollectionButton(_ enabled: Bool) {
@@ -204,14 +286,13 @@ extension MapDetailViewController {
         
         if isDataAvailable() {
             
-            if appDebugMode { print ("-> reload image data") }
+            // if appDebugMode { print ("\n--> reload image data\n") }
             photoCollectionView?.reloadData()
             
         } else {
         
-            if appDebugMode { print ("-> no image data available") }
-            mapNoPhotosInfoLabel.isEnabled = true
-            mapNoPhotosInfoLabel.isHidden = false
+            // if appDebugMode { print ("--> no image data available") }
+            toggleNoPhotosFoundInfoBox(true)
         }
     }
     

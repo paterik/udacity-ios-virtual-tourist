@@ -24,6 +24,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
     //
     // MARK: Class Special Constants
     //
+    
     let flickrClient = FlickrClient.sharedInstance
     
     //
@@ -43,7 +44,6 @@ class MapViewController: BaseController, MKMapViewDelegate {
     
     var _pinSelected:Pin!
     var _pinLastAdded:Pin? = nil
-    
     var mapViewPin:Pin?
     var mapViewPins:[Pin]?
     var mapViewRegion:MapRegion?
@@ -193,7 +193,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
                 //
                 if  _pinLastAdded !== nil {
                     
-                    flickrClient.getImagesByMapPin (_pinLastAdded!) {
+                    flickrClient.getImagesByMapPin (_pinLastAdded!, nil) {
                         
                         (success, error) in
                         

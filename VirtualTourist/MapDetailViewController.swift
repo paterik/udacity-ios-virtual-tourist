@@ -36,6 +36,8 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
     let mapPinImageName = "icnMapPin_v2"
     let mapNoPhotosInfoLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
     let collectionViewCellIdentifier = "flickrCell"
+    let mapMsgNoPhotosAvailable = "There are no photos available for this location"
+    let mapMsgPhotosInDownload = "Loading photos, please wait ..."
     
     //
     // MARK: Class Variables
@@ -44,6 +46,10 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
     var pin: Pin!
     var photoDataObjects = [Photo]()
     var photoObjects = [PhotoCellObject]()
+    var photoCellIndexRefreshed: Int = 0
+    var photoCellIndexNewTreshold: Int = 0
+    var photoCellIndexOldTreshold: Int = 0
+    var photoCellIndexFixed: Bool = false
     
     //
     // MARK: UIViewController Overrides
@@ -100,26 +106,27 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         // sample/default image (will be simplified in future version)
         //
         
-        if photo.imagePreview != nil {
+        cell.activityIndicator.stopAnimating()
+        cell.activityIndicator.isHidden = true
+        
+        if photo.isPlaceHolder || (photo.imageOrigin == nil && photo.imagePreview == nil) {
+        
+            cell.imageView.image = UIImage(named: "imgPhotoPlaceholder_v1")
+            cell.activityIndicator.startAnimating()
+            cell.activityIndicator.isHidden = false
+            // if appDebugMode { print ("using placeholder image for cel #\(indexPath.row)") }
+        
+        } else if photo.imagePreview != nil {
             
             cell.imageView.image = photo.imagePreview
-            if appDebugMode { print ("using preview image for cel #\(indexPath.row)") }
+            // if appDebugMode { print ("using preview image for cel #\(indexPath.row)") }
             
         } else if photo.imageOrigin != nil {
             
             cell.imageView.image = photo.imageOrigin
-            if appDebugMode { print ("using origin image for cel #\(indexPath.row)") }
+            // if appDebugMode { print ("using origin image for cel #\(indexPath.row)") }
             
-        } else {
-            
-            cell.imageView.image = UIImage(named: "sample_image")
-            if appDebugMode { print ("using sample image for cel #\(indexPath.row)") }
-
         }
-        
-        // weazL: download indicator problem seems to be placed here
-        cell.activityIndicator.stopAnimating()
-        cell.activityIndicator.isHidden = true
         
         return cell
     }
@@ -149,8 +156,8 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         flowLayout.minimumLineSpacing = collectionCellSpacing
         
         return CGSize(
-            width: collectionCellWidth,
-            height: collectionCellHeight
+            width  : collectionCellWidth,
+            height : collectionCellHeight
         )
     }
     
@@ -196,6 +203,9 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         // deactivate reload collection button after action call
         toggleRefreshCollectionButton(false)
         
+        // backup old photo threshold
+        photoCellIndexOldTreshold = pin.photos.count
+        
         let alert = UIAlertController(
             title: "Delete Collection",
             message: "Do you really want to refresh this collection by loading new images?",
@@ -212,8 +222,11 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
                 // delete successfully done?
                 if error == nil {
                     
+                    // clean collection view cache and load preset images
+                    self.cleanUpCollectionCache()
+                    
                     // load new imageSet using flickr api call
-                    self.flickrClient.getImagesByMapPin (self.pin!) {
+                    self.flickrClient.getImagesByMapPin (self.pin!, nil) {
                         
                         (success, error) in
                         
