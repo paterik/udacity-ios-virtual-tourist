@@ -96,11 +96,13 @@ class FlickrClient: NSObject {
                     DispatchQueue.main.async(execute: {
                         
                         // calculate the maximum number of photos available for this location
-                        let maxPhotoIndex = photoResultArray.count
-                        for (index, photoDictionary) in photoResultArray.enumerated() {
+                        let _imageExpectedCount = photoResultArray.count
+                        for (imageLoopIndex, photoDictionary) in photoResultArray.enumerated() {
                         
+                            let _imageUrl = photoDictionary["url_m"] as! String
+                            
                             // primary downloading process
-                            self.handlePhotoByFlickrUrl(photoDictionary["url_m"] as! String, targetPin)
+                            self.handlePhotoByFlickrUrl(_imageUrl, _imageExpectedCount, imageLoopIndex, targetPin)
                             {
                                 (imgDataOrigin, imgDataPreview, success, error) in
                                 
@@ -112,20 +114,8 @@ class FlickrClient: NSObject {
                                     
                                 } else {
                                     
-                                    // notification push for single finished download step (used in locationMapView/photoAlbumView)
-                                    NotificationCenter.default.post(
-                                        name: NSNotification.Name(rawValue: self.appDelegate.pinPhotoDownloadedNotification),
-                                        object: nil,
-                                        userInfo: [
-                                            "completed": index == maxPhotoIndex - 1,
-                                            "indexCurrent": index,
-                                            "indexMax": maxPhotoIndex
-                                        ]
-                                    )
-                                    
                                     if self.debugMode == true {
-                                        // print ("--- photo object successfully persisted ---")
-                                        print ("-> imageOrigin=\(imgDataOrigin!), imagePreview=\(imgDataPreview!), \(index + 1) of \(maxPhotoIndex) : \(self.appDelegate.pinPhotosCurrentlyDownloaded)")
+                                        print ("-> imageOrigin=\(imgDataOrigin!), imagePreview=\(imgDataPreview!), \(imageLoopIndex + 1) of \(_imageExpectedCount) : \(self.appDelegate.pinPhotosCurrentlyDownloaded)")
                                     }
                                 }
                             }

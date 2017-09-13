@@ -11,25 +11,6 @@ import CoreStore
 import Kingfisher
 
 extension FlickrClient {
-
-    func getJSONFromStringArray(
-       _ arrayData: [String : String]) -> String {
-        
-        var JSONString: String = "{}"
-        
-        do {
-            
-            let jsonData = try JSONSerialization.data(
-                withJSONObject: arrayData,
-                options: JSONSerialization.WritingOptions.prettyPrinted
-            )
-            
-            if let _jsonString = String(data: jsonData, encoding: String.Encoding.utf8) { JSONString = _jsonString }
-            
-        } catch { if debugMode { print ("An error occured in FlickrClient::getJSONFromStringArray -> \(error)") } }
-        
-        return JSONString
-    }
     
     func setPinNumberOfPagesByReference(
        _ pin: Pin,
@@ -48,18 +29,23 @@ extension FlickrClient {
                 
                 refPin.metaNumOfPages = pin.metaNumOfPages; return refPin
             },
+            
             success: { (transactionPin) in
                 
                 newNumOfPages = transactionPin.metaNumOfPages as! UInt32
                 completionHandlerForUpdatedPin(CoreStore.fetchExisting(transactionPin)!, true, nil)
                 
                 if self.debugMode == true {
-                    print ("--- pin object successfully updated ---")
-                    print ("    metaNumOfPages(old)=\(oldNumOfPages)), metaNumOfPages(new)=\(newNumOfPages)")
+                    print ("\n-> pin object successfully updated ---")
+                    print ("   metaNumOfPages(old)=\(oldNumOfPages)), metaNumOfPages(new)=\(newNumOfPages)\n")
                 }
             },
+            
             failure: { (error) in
                 completionHandlerForUpdatedPin(nil, false, error.localizedDescription)
+                if self.debugMode == true { print ("--- <failure> pin object processing/persistence failed: \(error) ---") }
+                
+                return
             }
         )
     }
@@ -90,8 +76,14 @@ extension FlickrClient {
         return NSString(format: "%f,%f,%f,%f", btmLeftLon, btmLeftLat, topRightLon, topRightLat) as String
     }
     
+    /*
+     *  This method seems to be the source of all headache I've had within the calculation of finale image processing -
+     *  state. I'm still have this issue and try to calculate the finale image arrival to comply the cache cleanUp ..
+     */
     func getDownloadedImageByFlickrUrl(
        _ imageUrl: String,
+       _ imageExpectedCount: Int,
+       _ imageLoopIndex: Int,
        _ completionHandlerForDowloadedImage: @escaping (_ rawImage: UIImage?, _ success: Bool?, _ error: String?) -> Void) {
         
         ImageDownloader.default.downloadTimeout = maxDownloadTimeout
@@ -103,38 +95,62 @@ extension FlickrClient {
                 
                 completionHandlerForDowloadedImage(nil, false, "\(String(describing: error!))")
                 
+                return
+                
             } else {
                 
                 completionHandlerForDowloadedImage(rawImage, true, nil)
                 self.appDelegate.pinPhotosCurrentlyDownloaded += 1
+                
+                // notification push for single finished download step (used in locationMapView/photoAlbumView)
+                NotificationCenter.default.post(
+                    name: NSNotification.Name(rawValue: self.appDelegate.pinPhotoDownloadedNotification),
+                    object: nil,
+                    userInfo: [
+                        "indexCurrent": imageLoopIndex,
+                        "indexMax": imageExpectedCount
+                    ]
+                )
             }
         }
     }
     
+    /*
+     * This method will be called within the api result loop through all available image url's the corresponding 
+     * request provide, start the download and handle the photo persistance ... This method is very restrictive!
+     * We'll stop media-url handling on any problem occured during raw-/previewImage handling so as any http-call
+     * thrown by our primary image downloader [getDownloadedImageByFlickrUrl(_)] ...
+     */
     func handlePhotoByFlickrUrl (
-       _ mediaUrl: String,
+       _ imageUrl: String,
+       _ imageExpectedCount: Int,
+       _ imageLoopIndex: Int,
        _ targetPin: Pin,
        _ completionHandlerForPhotoProcessor: @escaping (_ imgDataOrigin: Data?, _ imgDataPreview: Data?, _ success: Bool?, _ error: String?) -> Void) {
         
-        // handle download using ImageDownloader file processor
-        self.getDownloadedImageByFlickrUrl(mediaUrl) { (rawImage, success, error) in
+        // give handle to ImageDownloader processor ...
+        self.getDownloadedImageByFlickrUrl(imageUrl, imageExpectedCount, imageLoopIndex) { (rawImage, success, error) in
             
             if (error != nil) {
                 completionHandlerForPhotoProcessor(nil, nil, false, error)
+                if self.debugMode == true { print ("--- <failure> photo object download failed: \(String(describing: error?.description)) ---") }
+                
+                return
                 
             } else {
                 
-                // process/prepare origin image
+                // now http/request error? okay start processing/preparing origin image
                 guard let imageOrigin = UIImageJPEGRepresentation(rawImage!, 1) else {
                     completionHandlerForPhotoProcessor(nil, nil, false, error); return
                 }
                 
-                // process/prepare thumbnail version of primary image (65% compression, 50% downscale)
+                // now process/prepare thumbnail version of primary image (65% compression, 50% downscale)
                 guard let imagePreview = UIImageJPEGRepresentation(
                     rawImage!.resized(withPercentage: self.photoPreviewDownscale)!, self.photoPreviewQuality) else {
                     completionHandlerForPhotoProcessor(nil, nil, false, error); return
                 }
                 
+                // and finally persist the media using our photo entity
                 CoreStore.perform(
                     
                     asynchronous: { (transaction) -> Photo? in
@@ -142,8 +158,8 @@ extension FlickrClient {
                         if let _pinRef = transaction.fetchOne(From<Pin>(), Where("metaHash", isEqualTo: targetPin.metaHash))
                         {
                             self.photo = transaction.create(Into<Photo>())
-                            self.photo!.imageSourceURL = mediaUrl
-                            self.photo!.imageHash = mediaUrl.md5()
+                            self.photo!.imageSourceURL = imageUrl
+                            self.photo!.imageHash = imageUrl.md5()
                             self.photo!.imageRaw = imageOrigin
                             self.photo!.imagePreview = imagePreview
                             self.photo!.pin = _pinRef
@@ -157,21 +173,47 @@ extension FlickrClient {
                     
                         if transactionPhoto !== nil {
                             
+                            // everything went fine! Go back to next image url provided by flickrApiGet looper :)
                             completionHandlerForPhotoProcessor(imageOrigin, imagePreview, true, nil)
+                            
+                            return
                             
                         } else {
                         
-                            completionHandlerForPhotoProcessor(nil, nil, false, "Oops! Pin reference lost in space ...")
+                            completionHandlerForPhotoProcessor(nil, nil, false, "Oops! Unable to persist location image!")
+                            if self.debugMode == true { print ("--- <error> photo object processing/persistence not successfuly ---") }
+                            
+                            return
                         }
                         
                     },  failure: { (error) in
                     
-                        if self.debugMode == true { print ("--- photo object processing/persistence failed: \(error) ---") }
+                        completionHandlerForPhotoProcessor(nil, nil, false, "Oops! Failure during persisting location image: \(error)!")
+                        if self.debugMode == true { print ("--- <failure> photo object processing/persistence failed: \(error) ---") }
                     
                         return
                     }
                 )
             }
         }
+    }
+    
+    func getJSONFromStringArray(
+       _ arrayData: [String : String]) -> String {
+        
+        var JSONString: String = "{}"
+        
+        do {
+            
+            let jsonData = try JSONSerialization.data(
+                withJSONObject: arrayData,
+                options: JSONSerialization.WritingOptions.prettyPrinted
+            )
+            
+            if let _jsonString = String(data: jsonData, encoding: String.Encoding.utf8) { JSONString = _jsonString }
+            
+        } catch { if debugMode { print ("An error occured in FlickrClient::getJSONFromStringArray -> \(error)") } }
+        
+        return JSONString
     }
 }

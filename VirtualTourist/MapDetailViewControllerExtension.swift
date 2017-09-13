@@ -211,13 +211,14 @@ extension MapDetailViewController {
                         self.photoObjects[self.photoCellIndexRefreshed] = photoCellObject
                         self.photoCellIndexRefreshed += 1
                         
+                        // ahhhhhhhhhhhhh still won't working :( !!!!!
                         if self.appDelegate.pinPhotosCurrentlyDownloaded == self.photoCellIndexNewTreshold {
                             
-                            print ("")
+                            /*print ("")
                             print ("!!!!!!!!!!!!!!!!!")
                             print ("!!! COMPLETED !!!")
                             print ("!!!!!!!!!!!!!!!!!")
-                            print ("")
+                            print ("")*/
                             
                             self.pin.isDownloading = false
                             self.toggleRefreshCollectionButton(true)
