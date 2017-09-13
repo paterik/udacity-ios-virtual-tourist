@@ -17,6 +17,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     let pinPhotoDownloadedNotification = "pinPhotoDownloadedNotification"
     // notification tag for photostack download completed (all photos finished)
     let pinPhotoDownloadedCompleteNotification = "pinPhotoDownloadedCompleteNotification"
+    // maximum number of photos each collectionView can present at once
+    let pinMaxNumberOfPhotos = 21
     
     //
     // MARK: Variables (Intern)
@@ -29,6 +31,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var useCurrentDeviceLocation: Bool = false
     var useLongitude: Double?
     var useLatitude: Double?
+    var pinPhotosCurrentlyDownloaded: Int = 0
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
