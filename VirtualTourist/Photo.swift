@@ -26,4 +26,5 @@ struct PhotoCellObject {
     var imageSourceURL: String?
     var imageOrigin: UIImage?
     var imagePreview: UIImage?
+    var isPlaceHolder: Bool = false
 }
