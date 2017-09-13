@@ -18,90 +18,59 @@ class FlickrClient: NSObject {
     static let sharedInstance = FlickrClient()
     
     //
+    // MARK: Constants (Special)
+    //
+    
+    let client = RequestClient.sharedInstance
+    let appDelegate = UIApplication.shared.delegate as! AppDelegate
+    
+    //
     // MARK: Constants (Normal)
     //
     
     let debugMode: Bool = true
-    let appDelegate = UIApplication.shared.delegate as! AppDelegate
-    
     let session = URLSession.shared
-    let client = RequestClient.sharedInstance
     let maxAllowedPages = 2500
-    let maxPhotesEachPage = 20
     let maxDownloadTimeout = 30.0
     let photoPreviewDownscale: CGFloat = 0.5
     let photoPreviewQuality: CGFloat = 0.65
     
+    //
+    // MARK: Variables
+    //
+    
     var photo:Photo?
-    
-    //
-    // MARK: Constants (API)
-    //
-    
-    struct apiConfig {
-        
-        static let _url: String = "https://api.flickr.com/services/rest/"
-        static let _pubKey: String = "945c147f91129f6f5a795b8a58f15852"
-        static let _format: String = "json"
-        static let _version: UInt8 = 1
-    }
-    
-    struct apiBaseParams {
-        
-        static let _format = "format"
-        static let _page = "page"
-        static let _perPage = "per_page"
-        static let _apiKey = "api_key"
-        static let _method = "method"
-        static let _noJSONCallback = "nojsoncallback"
-    }
-    
-    struct apiSearchParams {
-        
-        static let methodName = "flickr.photos.search"
-        static let accuracy = "accuracy"
-        static let contentType = "content_type"
-        static let media = "media"
-        static let extras = "extras"
-        static let bbox = "bbox"
-        static let sort = "sort"
-        static let safeSearch = "safe_search"
-    }
-    
-    struct apiSearchBBoxParams {
-        
-        static let _bbHalfWidth = 1.0
-        static let _bbHalfHeight = 1.0
-        static let _latMin = -90.0
-        static let _latMax = 90.0
-        static let _lonMin = -180.0
-        static let _lonMax = 180.0
-    }
     
     func getImagesByMapPin (
        _ targetPin: Pin,
+       _ numberOfPhotos: Int?,
        _ completionHandlerForFetchFlickrImages: @escaping (_ success: Bool?, _ error: String?) -> Void) {
+        
+        var _numberOfPhotos = appDelegate.pinMaxNumberOfPhotos
+        if   numberOfPhotos != nil {
+            _numberOfPhotos = numberOfPhotos!
+        }
         
         let _requestParams = [
     
-            apiBaseParams._format: apiConfig._format,
-            apiBaseParams._page: NSString(format: "%d", getRandomPageFromPersistedPin(targetPin)) as String,
-            apiBaseParams._perPage: NSString(format: "%d", maxPhotesEachPage) as String,
-            apiBaseParams._noJSONCallback: "1",
-            apiBaseParams._apiKey: apiConfig._pubKey,
-            apiBaseParams._method: apiSearchParams.methodName,
+            FlickrClientConstants.apiBaseParams._format: FlickrClientConstants.apiConfig._format,
+            FlickrClientConstants.apiBaseParams._page: NSString(format: "%d", getRandomPageFromPersistedPin(targetPin)) as String,
+            FlickrClientConstants.apiBaseParams._perPage: NSString(format: "%d", _numberOfPhotos) as String,
+            FlickrClientConstants.apiBaseParams._noJSONCallback: "1",
+            FlickrClientConstants.apiBaseParams._apiKey: FlickrClientConstants.apiConfig._pubKey,
+            FlickrClientConstants.apiBaseParams._method: FlickrClientConstants.apiSearchParams.methodName,
             
-            apiSearchParams.bbox: getBoundingBoxAsString(targetPin),
+            FlickrClientConstants.apiSearchParams.bbox: getBoundingBoxAsString(targetPin),
             
-            apiSearchParams.safeSearch: "1",
-            apiSearchParams.accuracy: "1",
-            apiSearchParams.contentType: "1",
-            apiSearchParams.media: "photos",
-            apiSearchParams.extras: "url_m"
+            FlickrClientConstants.apiSearchParams.safeSearch: "1",
+            FlickrClientConstants.apiSearchParams.accuracy: "1",
+            FlickrClientConstants.apiSearchParams.contentType: "1",
+            FlickrClientConstants.apiSearchParams.media: "photos",
+            FlickrClientConstants.apiSearchParams.extras: "url_m"
             
         ] as [String : AnyObject]
         
-        client.get(apiConfig._url, headers: [:], parameters: _requestParams, bodyParameters: [:])
+        client.get(FlickrClientConstants.apiConfig._url, headers: [:], parameters: _requestParams, bodyParameters: [:])
         {
             (data, error) in
             
@@ -126,9 +95,11 @@ class FlickrClient: NSObject {
                     // coreStock handling of api fetch resulting photos
                     DispatchQueue.main.async(execute: {
                         
-                        let maxPhotoIndex = photoResultArray.count - 1
+                        // calculate the maximum number of photos available for this location
+                        let maxPhotoIndex = photoResultArray.count
                         for (index, photoDictionary) in photoResultArray.enumerated() {
                         
+                            // primary downloading process
                             self.handlePhotoByFlickrUrl(photoDictionary["url_m"] as! String, targetPin)
                             {
                                 (imgDataOrigin, imgDataPreview, success, error) in
@@ -145,12 +116,16 @@ class FlickrClient: NSObject {
                                     NotificationCenter.default.post(
                                         name: NSNotification.Name(rawValue: self.appDelegate.pinPhotoDownloadedNotification),
                                         object: nil,
-                                        userInfo: ["completed": index == maxPhotoIndex]
+                                        userInfo: [
+                                            "completed": index == maxPhotoIndex - 1,
+                                            "indexCurrent": index,
+                                            "indexMax": maxPhotoIndex
+                                        ]
                                     )
                                     
                                     if self.debugMode == true {
-                                        print ("--- photo object successfully persisted ---")
-                                        print ("    imageOrigin=\(imgDataOrigin!), imagePreview=\(imgDataPreview!), \(index) of \(maxPhotoIndex)")
+                                        // print ("--- photo object successfully persisted ---")
+                                        print ("-> imageOrigin=\(imgDataOrigin!), imagePreview=\(imgDataPreview!), \(index + 1) of \(maxPhotoIndex) : \(self.appDelegate.pinPhotosCurrentlyDownloaded)")
                                     }
                                 }
                             }

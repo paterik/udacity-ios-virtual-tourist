@@ -68,7 +68,7 @@ extension FlickrClient {
        _ targetPin: Pin) -> UInt32 {
         
         if  let numOfPages = targetPin.metaNumOfPages {
-            let maxNumOfPages = Int((Double(maxAllowedPages) / Double(maxPhotesEachPage)).rounded())
+            let maxNumOfPages = Int((Double(maxAllowedPages) / Double(appDelegate.pinMaxNumberOfPhotos)).rounded())
             
             var numPagesInt = numOfPages as! Int
                 numPagesInt = (numPagesInt > maxNumOfPages) ? maxNumOfPages : numPagesInt
@@ -82,10 +82,10 @@ extension FlickrClient {
     func getBoundingBoxAsString(
        _ pin: Pin) -> String {
         
-        let btmLeftLon = max(pin.longitude - apiSearchBBoxParams._bbHalfWidth, apiSearchBBoxParams._lonMin)
-        let btmLeftLat = max(pin.latitude - apiSearchBBoxParams._bbHalfHeight, apiSearchBBoxParams._latMin)
-        let topRightLon = min(pin.longitude + apiSearchBBoxParams._bbHalfHeight, apiSearchBBoxParams._lonMax)
-        let topRightLat = min(pin.latitude + apiSearchBBoxParams._bbHalfHeight, apiSearchBBoxParams._latMax)
+        let btmLeftLon = max(pin.longitude - FlickrClientConstants.apiSearchBBoxParams._bbHalfWidth, FlickrClientConstants.apiSearchBBoxParams._lonMin)
+        let btmLeftLat = max(pin.latitude - FlickrClientConstants.apiSearchBBoxParams._bbHalfHeight, FlickrClientConstants.apiSearchBBoxParams._latMin)
+        let topRightLon = min(pin.longitude + FlickrClientConstants.apiSearchBBoxParams._bbHalfHeight, FlickrClientConstants.apiSearchBBoxParams._lonMax)
+        let topRightLat = min(pin.latitude + FlickrClientConstants.apiSearchBBoxParams._bbHalfHeight, FlickrClientConstants.apiSearchBBoxParams._latMax)
         
         return NSString(format: "%f,%f,%f,%f", btmLeftLon, btmLeftLat, topRightLon, topRightLat) as String
     }
@@ -106,6 +106,7 @@ extension FlickrClient {
             } else {
                 
                 completionHandlerForDowloadedImage(rawImage, true, nil)
+                self.appDelegate.pinPhotosCurrentlyDownloaded += 1
             }
         }
     }
