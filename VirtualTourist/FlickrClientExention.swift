@@ -100,7 +100,6 @@ extension FlickrClient {
             } else {
                 
                 completionHandlerForDowloadedImage(rawImage, true, nil)
-                self.appDelegate.pinPhotosCurrentlyDownloaded += 1
                 
                 // notification push for single finished download step (used in locationMapView/photoAlbumView)
                 NotificationCenter.default.post(
@@ -108,7 +107,8 @@ extension FlickrClient {
                     object: nil,
                     userInfo: [
                         "indexCurrent": imageLoopIndex,
-                        "indexMax": imageExpectedCount
+                        "indexMax": imageExpectedCount,
+                        "imageUrlHash": imageUrl.md5()
                     ]
                 )
             }
@@ -174,6 +174,7 @@ extension FlickrClient {
                         if transactionPhoto !== nil {
                             
                             // everything went fine! Go back to next image url provided by flickrApiGet looper :)
+                            
                             completionHandlerForPhotoProcessor(imageOrigin, imagePreview, true, nil)
                             
                             return

@@ -41,6 +41,26 @@ class FlickrClient: NSObject {
     
     var photo:Photo?
     
+    func setImageQueue(_ numberOfImages: Int, _ targetPin: Pin) {
+    
+        appDelegate.photoQueue.removeAll()
+        appDelegate.photoQueueImagesDownloaded = 0
+        
+        for index in 0 ... numberOfImages - 1  {
+            appDelegate.photoQueue.append(PhotoQueueObject(
+                metaHash: "\(index)".md5(),
+                metaQueueIndex: index,
+                metaQueueCreatedAt: Date(),
+                metaQueueUpdatedAt: Date(),
+                metaLocationHash: targetPin.metaHash,
+                metaDownloadCompleted: false,
+                metaDownloadMsg: "download photo #\(index)",
+                metaDataSizeRaw: 0.0,
+                metaDataSizeConverted: 0.0
+            ))
+        }
+    }
+    
     func getImagesByMapPin (
        _ targetPin: Pin,
        _ numberOfPhotos: Int?,
@@ -97,9 +117,14 @@ class FlickrClient: NSObject {
                         
                         // calculate the maximum number of photos available for this location
                         let _imageExpectedCount = photoResultArray.count
+                        // prepare imageQueue stack
+                        self.setImageQueue(_imageExpectedCount, targetPin)
+                        // loop through image urls and start photo processing
                         for (imageLoopIndex, photoDictionary) in photoResultArray.enumerated() {
                         
                             let _imageUrl = photoDictionary["url_m"] as! String
+                            
+                            var queueItem = self.appDelegate.photoQueue[imageLoopIndex]
                             
                             // primary downloading process
                             self.handlePhotoByFlickrUrl(_imageUrl, _imageExpectedCount, imageLoopIndex, targetPin)
@@ -108,15 +133,30 @@ class FlickrClient: NSObject {
                                 
                                 if (error != nil) {
                                     
+                                    // update queue media item (for failure)
+                                    queueItem._metaDownloadCompleted = false
+                                    queueItem._metaDownloadMsg = error?.description
+                                    queueItem._metaQueueUpdatedAt = Date()
+                                    
+                                    self.appDelegate.photoQueue[imageLoopIndex] = queueItem
+                                    
                                     completionHandlerForFetchFlickrImages(false, "Oops! Download could not be handled: \(error!)")
                                     
                                     return
                                     
                                 } else {
                                     
-                                    if self.debugMode == true {
-                                        print ("-> imageOrigin=\(imgDataOrigin!), imagePreview=\(imgDataPreview!), \(imageLoopIndex + 1) of \(_imageExpectedCount) : \(self.appDelegate.pinPhotosCurrentlyDownloaded)")
-                                    }
+                                    // update queue media item (for success)
+                                    let queueMsg = "-> src=\(imgDataOrigin!), min=\(imgDataPreview!), \(imageLoopIndex + 1) of \(_imageExpectedCount)"
+                                    
+                                    queueItem._metaDownloadCompleted = true
+                                    queueItem._metaQueueUpdatedAt = Date()
+                                    queueItem._metaHash = _imageUrl.md5()
+                                    queueItem._metaDataSizeConverted = Double(imgDataPreview!.count) / 1024.0
+                                    queueItem._metaDataSizeRaw = Double(imgDataOrigin!.count) / 1024.0
+                                    queueItem._metaDownloadMsg = queueMsg
+                                    
+                                    self.appDelegate.photoQueue[imageLoopIndex] = queueItem
                                 }
                             }
                         }
