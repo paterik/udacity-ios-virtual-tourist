@@ -114,17 +114,14 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
             cell.imageView.image = UIImage(named: "imgPhotoPlaceholder_v1")
             cell.activityIndicator.startAnimating()
             cell.activityIndicator.isHidden = false
-            // if appDebugMode { print ("using placeholder image for cel #\(indexPath.row)") }
         
         } else if photo.imagePreview != nil {
             
             cell.imageView.image = photo.imagePreview
-            // if appDebugMode { print ("using preview image for cel #\(indexPath.row)") }
             
         } else if photo.imageOrigin != nil {
             
             cell.imageView.image = photo.imageOrigin
-            // if appDebugMode { print ("using origin image for cel #\(indexPath.row)") }
             
         }
         
