@@ -31,7 +31,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var useCurrentDeviceLocation: Bool = false
     var useLongitude: Double?
     var useLatitude: Double?
-    var pinPhotosCurrentlyDownloaded: Int = 0
+    
+    var photoQueue: [PhotoQueueObject] = []
+    var photoQueueImagesDownloaded: Int = 0
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
@@ -114,6 +116,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
     }
-
 }
 
