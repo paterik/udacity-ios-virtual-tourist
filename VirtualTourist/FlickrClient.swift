@@ -138,11 +138,9 @@ class FlickrClient: NSObject {
                                     queueItem._metaDownloadMsg = error?.description
                                     queueItem._metaQueueUpdatedAt = Date()
                                     
-                                    self.appDelegate.photoQueue[imageLoopIndex] = queueItem
-                                    
                                     completionHandlerForFetchFlickrImages(false, "Oops! Download could not be handled: \(error!)")
                                     
-                                    return
+                                    self.appDelegate.photoQueue[imageLoopIndex] = queueItem
                                     
                                 } else {
                                     
@@ -156,7 +154,10 @@ class FlickrClient: NSObject {
                                     queueItem._metaDataSizeRaw = Double(imgDataOrigin!.count) / 1024.0
                                     queueItem._metaDownloadMsg = queueMsg
                                     
+                                    completionHandlerForFetchFlickrImages(true, nil)
+                                    
                                     self.appDelegate.photoQueue[imageLoopIndex] = queueItem
+                                    
                                 }
                             }
                         }

@@ -104,12 +104,7 @@ extension FlickrClient {
                 // notification push for single finished download step (used in locationMapView/photoAlbumView)
                 NotificationCenter.default.post(
                     name: NSNotification.Name(rawValue: self.appDelegate.pinPhotoDownloadedNotification),
-                    object: nil,
-                    userInfo: [
-                        "indexCurrent": imageLoopIndex,
-                        "indexMax": imageExpectedCount,
-                        "imageUrlHash": imageUrl.md5()
-                    ]
+                    object: nil, userInfo: ["indexCurrent": imageLoopIndex, "indexMax": imageExpectedCount]
                 )
             }
         }
@@ -174,25 +169,18 @@ extension FlickrClient {
                         if transactionPhoto !== nil {
                             
                             // everything went fine! Go back to next image url provided by flickrApiGet looper :)
-                            
                             completionHandlerForPhotoProcessor(imageOrigin, imagePreview, true, nil)
-                            
-                            return
                             
                         } else {
                         
                             completionHandlerForPhotoProcessor(nil, nil, false, "Oops! Unable to persist location image!")
                             if self.debugMode == true { print ("--- <error> photo object processing/persistence not successfuly ---") }
-                            
-                            return
                         }
                         
                     },  failure: { (error) in
                     
                         completionHandlerForPhotoProcessor(nil, nil, false, "Oops! Failure during persisting location image: \(error)!")
                         if self.debugMode == true { print ("--- <failure> photo object processing/persistence failed: \(error) ---") }
-                    
-                        return
                     }
                 )
             }
