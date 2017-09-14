@@ -19,6 +19,9 @@ extension MapDetailViewController {
         photoDataObjects.removeAll()
         photoCellIndexRefreshed = 0
         
+        // reset async photo download/processing counter
+        appDelegate.photoQueueImagesDownloaded = 0
+        
         // prepare image cache for the number of photos previously persisted for this pin
         addCollectionPlaceHolderPhotos(photoCellIndexOldTreshold)
         
@@ -26,13 +29,10 @@ extension MapDetailViewController {
         photoCollectionView?.reloadData()
     }
     
-    func addCollectionPlaceHolderPhotos(_ number: Int) {
+    func addCollectionPlaceHolderPhotos(_ numberOfPhotos: Int) {
 
-        // reset async photo download/processing counter
-        appDelegate.pinPhotosCurrentlyDownloaded = 0
-        
         // build placeholder imageStack after cleanUp old (real) image collection(s)
-        for index in 0 ... number - 1  {
+        for index in 0 ... numberOfPhotos - 1  {
             self.photoObjects.append(PhotoCellObject(
                 imageHash: "\(index)".md5(),
                 imageSourceURL: "\(index)",
@@ -138,21 +138,6 @@ extension MapDetailViewController {
         miniMapView.addAnnotation(pin)
     }
     
-    func getIndexOfDownloadedPhoto(_ notification: NSNotification?) -> Int {
-    
-        if notification == nil { return -1 }
-        
-        if let userInfo = notification!.userInfo as? [String: Any]
-        {
-            if let refreshedIndex = userInfo["indexCurrent"] {
-                
-                return refreshedIndex as! Int
-            }
-        }
-        
-        return 0
-    }
-    
     func getMaxIndexOfCurrentDownloadSession(_ notification: NSNotification?) -> Int {
         
         if notification == nil { return -1 }
@@ -167,7 +152,6 @@ extension MapDetailViewController {
         
         return 0
     }
-
     
     func loadPhotosForCollectionView(_ notification: NSNotification?) {
         
@@ -181,6 +165,7 @@ extension MapDetailViewController {
                         
                     self.photoDataObjects = photos!
                     
+                    
                     if notification == nil {
                         
                         // remove complete placeholder imageStack
@@ -191,17 +176,12 @@ extension MapDetailViewController {
                     
                     } else {
                         
-                        // check old photo number threshold and extend placeholder stack if necessary
                         self.mapNoPhotosInfoLabel.text = self.mapMsgPhotosInDownload
                         self.mapNoPhotosInfoLabel.backgroundColor = UIColor(netHex: 0x23A7CE)
                         
+                        // check old photo number threshold and extend placeholder stack if necessary
                         self.photoCellIndexNewTreshold = self.getMaxIndexOfCurrentDownloadSession(notification)
                         if (self.photoCellIndexOldTreshold != self.photoCellIndexNewTreshold) && self.photoCellIndexFixed == false {
-                            
-                            if self.appDebugMode {
-                                print ("--> detected treshold missmatch (\(self.photoCellIndexNewTreshold) vs \(self.photoCellIndexOldTreshold) photos)")
-                            }
-                            
                             self.addCollectionPlaceHolderPhotos(self.photoCellIndexNewTreshold - self.photoCellIndexOldTreshold)
                             self.photoCellIndexFixed = true
                         }
@@ -211,21 +191,30 @@ extension MapDetailViewController {
                         self.photoObjects[self.photoCellIndexRefreshed] = photoCellObject
                         self.photoCellIndexRefreshed += 1
                         
-                        // ahhhhhhhhhhhhh still won't working :( !!!!!
-                        if self.appDelegate.pinPhotosCurrentlyDownloaded == self.photoCellIndexNewTreshold {
-                            
-                            /*print ("")
-                            print ("!!!!!!!!!!!!!!!!!")
-                            print ("!!! COMPLETED !!!")
-                            print ("!!!!!!!!!!!!!!!!!")
-                            print ("")*/
-                            
+                        self.appDelegate.photoQueueImagesDownloaded = 0
+                        for queueItem in self.appDelegate.photoQueue {
+                        
+                            if queueItem._metaDownloadCompleted! == true {
+                                
+                                self.appDelegate.photoQueueImagesDownloaded += 1
+                                let qTime: Int = self.getSecondsBetweenTwoDates(queueItem._metaQueueCreatedAt!, queueItem._metaQueueUpdatedAt!)
+                                let qSizeRawInKb = queueItem._metaDataSizeRaw!.rounded()
+                                let qSizeThumbInKb = queueItem._metaDataSizeConverted!.rounded()
+                                let qIndex = queueItem._metaQueueIndex!
+                                
+                                if self.appDebugMode == true {
+                                    print ("Queue: photo #\(qIndex) q_raw: \(qSizeRawInKb), q_thumb: \(qSizeThumbInKb) finished in \(qTime) sec")
+                                }
+                            }
+                        }
+                        
+                        // check queue final state and cleanUp cache/placeholder fragments
+                        if self.appDelegate.photoQueueImagesDownloaded == self.photoCellIndexNewTreshold {
+                        
                             self.pin.isDownloading = false
                             self.toggleRefreshCollectionButton(true)
                             self.toggleNoPhotosFoundInfoBox(false)
-                            
-                            // self.cleanUpCollectionViewCache()
-                            // self.refreshCollectionView()
+                            self.cleanUpCollectionViewCache()
                         }
                     }
                 }
@@ -239,12 +228,25 @@ extension MapDetailViewController {
         }
     }
     
+    func getSecondsBetweenTwoDates(
+       _ startDate: Date,
+       _ endDate: Date) -> Int {
+        
+        let calendar = Calendar.current
+        let unitFlags = Set<Calendar.Component>([ .second])
+        let datecomponenets = calendar.dateComponents(unitFlags, from: startDate, to: endDate)
+        
+        return datecomponenets.second!
+    }
+    
     func cleanUpCollectionViewCache() {
     
-        print ("===> cleanUp collectionView ...")
+        if self.appDebugMode == true {
+            print ("===> cleanUp collectionView ...")
+        }
+        
         for (index, photo) in photoObjects.enumerated() {
             if photo.isPlaceHolder {
-                print ("===> photo #\(index) of db_max:\(photoDataObjects.count) and preview_max:\(photoObjects.count) is bad <===")
                 if index <= self.photoObjects.count {
                     photoObjects.remove(at: index)
                 }
@@ -287,13 +289,12 @@ extension MapDetailViewController {
         
         if isDataAvailable() {
             
-            // if appDebugMode { print ("\n--> reload image data\n") }
             photoCollectionView?.reloadData()
             
         } else {
-        
-            // if appDebugMode { print ("--> no image data available") }
+            
             toggleNoPhotosFoundInfoBox(true)
+            
         }
     }
     
