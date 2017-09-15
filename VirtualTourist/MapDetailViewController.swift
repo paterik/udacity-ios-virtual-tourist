@@ -35,20 +35,14 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
     let mapPinIdentifier = "MiniMapPin"
     let mapPinImageName = "icnMapPin_v2"
     let mapNoPhotosInfoLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
-    let collectionViewCellIdentifier = "flickrCell"
     let mapMsgNoPhotosAvailable = "There are no photos available for this location"
-    let mapMsgPhotosInDownload = "Loading photos, please wait ..."
+    let collectionViewCellIdentifier = "flickrCell"
     
     //
     // MARK: Class Variables
     //
     
     var pin: Pin!
-    var photoDataObjects = [Photo]()
-    var photoCellIndexRefreshed: Int = 0
-    var photoCellIndexNewTreshold: Int = 0
-    var photoCellIndexOldTreshold: Int = 0
-    var photoCellIndexFixed: Bool = false
     
     //
     // MARK: UIViewController Overrides
@@ -199,9 +193,6 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         // deactivate reload collection button after action call
         toggleRefreshCollectionButton(false)
         
-        // backup old photo threshold
-        photoCellIndexOldTreshold = pin.photos.count
-        
         let alert = UIAlertController(
             title: "Delete Collection",
             message: "Do you really want to refresh this collection by loading new images?",
@@ -229,7 +220,6 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
                         if success == false || error != nil {
                             
                             self._handleErrorAsSimpleDialog("Error", error?.description ?? "unkown error occurred")
-                        
                         }
                     }
                 }

@@ -32,6 +32,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var useLongitude: Double?
     var useLatitude: Double?
     
+    var photoDataObjects: [Photo] = []
     var photoQueue: [PhotoQueueItem] = []
     var photoQueueImagesDownloaded: Int = 0
     var photoQueueImagesAvailable: Int = 0

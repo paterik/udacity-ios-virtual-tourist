@@ -13,19 +13,6 @@ import MapKit
 
 extension MapDetailViewController {
     
-    func cleanUpCollectionCache() {
-    
-        photoDataObjects.removeAll()
-        photoCellIndexRefreshed = 0
-        
-        // reset async photo download/processing queue
-        appDelegate.photoQueue.removeAll()
-        appDelegate.photoQueueImagesDownloaded = 0
-        
-        // reload collectionView to show/refresh items
-        photoCollectionView?.reloadData()
-    }
-    
     func deletePhotosOfCollectionByPin (
        _ pin: Pin,
        _ completionHandlerForDeletePhotos: @escaping (_ success: Bool?, _ error: String?) -> Void) {
@@ -81,6 +68,21 @@ extension MapDetailViewController {
         )
     }
     
+    func getMaxIndexOfCurrentDownloadSession(
+       _ notification: NSNotification?) -> Int {
+        
+        if notification == nil { return 0 }
+        
+        if let userInfo = notification!.userInfo as? [String: Any]
+        {
+            if let refreshedIndex = userInfo["indexMax"] {
+                return refreshedIndex as! Int
+            }
+        }
+        
+        return 0
+    }
+    
     func setupUICollectionView() {
         
         photoCollectionView.isHidden = false
@@ -97,113 +99,6 @@ extension MapDetailViewController {
         miniMapView.setRegion(pinRegion, animated: true)
         miniMapView.setCenter(pin.coordinate, animated: true)
         miniMapView.addAnnotation(pin)
-    }
-    
-    func getMaxIndexOfCurrentDownloadSession(_ notification: NSNotification?) -> Int {
-        
-        if notification == nil { return -1 }
-        
-        if let userInfo = notification!.userInfo as? [String: Any]
-        {
-            if let refreshedIndex = userInfo["indexMax"] {
-                
-                return refreshedIndex as! Int
-            }
-        }
-        
-        return 0
-    }
-    
-    func setCollectionViewInfoLabelProcessing() {
-    
-        mapNoPhotosInfoLabel.text = mapMsgPhotosInDownload
-        mapNoPhotosInfoLabel.backgroundColor = UIColor(netHex: 0x23A7CE)
-    }
-    
-    func setCollectionViewInfoLabelNoData() {
-        
-        mapNoPhotosInfoLabel.text = mapMsgNoPhotosAvailable
-        mapNoPhotosInfoLabel.backgroundColor = UIColor(netHex: 0xEC2C61)
-    }
-    
-    func loadPhotosForCollectionView(_ notification: NSNotification?) {
-        
-        getPhotosForCollectionByPin() {
-                
-            (photos, success, error) in
-                
-            if success == true {
-                    
-                if photos != nil {
-                        
-                    self.photoDataObjects = photos!
-                    
-                    //
-                    // mode 1: normal loading of persisted photo stack
-                    //
-                    
-                    if notification == nil {
-                        
-                        // remove complete placeholder imageStack
-                        self.appDelegate.photoQueue.removeAll()
-                        for (index, photo) in self.photoDataObjects.enumerated() {
-                            self.appDelegate.photoQueue.append(photo.convertToPhotoQueueObject(index))
-                        }
-                    
-                    //
-                    // mode 2: event based refresh loading of new persisted photo sack
-                    //
-                        
-                    } else {
-                        
-                        self.setCollectionViewInfoLabelProcessing()
-                        
-                        // determine the maximal photo stack count available from last api request
-                        self.appDelegate.photoQueueImagesAvailable = self.getMaxIndexOfCurrentDownloadSession(notification)
-                        self.appDelegate.photoQueueImagesDownloaded = 0
-                        
-                        // iterate through complete image stack to fetch the latest downloaded image
-                        for (queueIndex, queueItem) in self.appDelegate.photoQueue.enumerated() {
-                        
-                            // count current download stack position to predict download finish line
-                            if queueItem._metaDownloadCompleted! == true { self.appDelegate.photoQueueImagesDownloaded += 1 }
-                            
-                            // try to fetch a photo which was downloaded but not presented as cell
-                            if  queueItem._metaDownloadCompleted! == true &&
-                                queueItem._metaDownloadAsCellProcessed == false {
-                                
-                                var queueObjectToUpdate = self.appDelegate.photoQueue[queueIndex]
-                                    queueObjectToUpdate._metaDownloadAsCellProcessed = true
-                                
-                                self.appDelegate.photoQueue[queueIndex] = queueObjectToUpdate
-                                
-                                let qTime: Int = self.getSecondsBetweenTwoDates(queueItem._metaQueueCreatedAt!, queueItem._metaQueueUpdatedAt!)
-                                let qSizeRawInKb = queueItem._metaDataSizeRaw!.rounded()
-                                let qSizeThumbInKb = queueItem._metaDataSizeConverted!.rounded()
-                                
-                                if self.appDebugMode == true {
-                                    print ("Queue/Cell: \(queueIndex)/\(self.appDelegate.photoQueueImagesAvailable) updated => [q_raw: \(qSizeRawInKb)kb, q_thumb: \(qSizeThumbInKb)kb, q_time: \(qTime)s ] #\(self.appDelegate.photoQueueImagesDownloaded)")
-                                }
-                            }
-                        }
-                        
-                        // check queue final state and cleanUp cache/placeholder fragments
-                        if self.appDelegate.photoQueueImagesDownloaded == self.appDelegate.photoQueueImagesAvailable - 1 {
-                        
-                            self.pin.isDownloading = false
-                            self.toggleRefreshCollectionButton(true)
-                            self.toggleCollectionViewInfoLabel(false)
-                        }
-                    }
-                }
-                
-                self.refreshCollectionView()
-                    
-            } else {
-                    
-                if self.appDebugMode { print (error ?? "unknown image handler problem") }
-            }
-        }
     }
     
     func getSecondsBetweenTwoDates(
@@ -232,10 +127,101 @@ extension MapDetailViewController {
         }
     }
     
+    func cleanUpCollectionCache() {
+        
+        // reset async photo data/download/processing queue
+        appDelegate.photoDataObjects.removeAll()
+        appDelegate.photoQueue.removeAll()
+        appDelegate.photoQueueImagesDownloaded = 0
+        photoCollectionView?.reloadData()
+    }
+    
+    func loadPhotosForCollectionView(
+       _ notification: NSNotification?) {
+        
+         getPhotosForCollectionByPin() {
+            
+            (photos, success, error) in
+            
+            if success == true {
+                
+                if photos != nil {
+                    
+                    self.appDelegate.photoDataObjects = photos!
+                    
+                    //
+                    // mode 1: normal loading of persisted photo stack
+                    //
+                    
+                    if notification == nil {
+                        
+                        // remove complete placeholder imageStack
+                        self.appDelegate.photoQueue.removeAll()
+                        for (index, photo) in self.appDelegate.photoDataObjects.enumerated() {
+                            self.appDelegate.photoQueue.append(photo.convertToPhotoQueueObject(index))
+                        }
+                        
+                        //
+                        // mode 2: event based refresh loading of new persisted photo sack
+                        //
+                        
+                    } else {
+                        
+                        // determine the maximal photo stack count available from last api request
+                        self.appDelegate.photoQueueImagesAvailable = self.getMaxIndexOfCurrentDownloadSession(notification)
+                        self.appDelegate.photoQueueImagesDownloaded = 0 // ... and cleanUp download counter
+                        
+                        // iterate through complete image stack to fetch the latest downloaded image
+                        for (queueIndex, queueItem) in self.appDelegate.photoQueue.enumerated() {
+                            
+                            // count current download stack position to predict download finish line
+                            if queueItem._metaDownloadCompleted! == true { self.appDelegate.photoQueueImagesDownloaded += 1 }
+                            // try to fetch a photo which was downloaded but currently not presented as cell
+                            if  queueItem._metaDownloadCompleted! == true &&
+                                queueItem._metaDownloadAsCellProcessed == false {
+                                
+                                var queueObjectToUpdate = self.appDelegate.photoQueue[queueIndex]
+                                queueObjectToUpdate._metaDownloadAsCellProcessed = true
+                                queueObjectToUpdate._metaQueueUpdatedAt = Date()
+                                
+                                self.appDelegate.photoQueue[queueIndex] = queueObjectToUpdate
+                                
+                                // print put some statistics
+                                if self.appDebugMode == true {
+                                    
+                                    let qTime: Int = self.getSecondsBetweenTwoDates(queueItem._metaQueueCreatedAt!, queueItem._metaQueueUpdatedAt!)
+                                    let qSizeRawInKb = queueItem._metaDataSizeRaw!.rounded()
+                                    let qSizeThumbInKb = queueItem._metaDataSizeConverted!.rounded()
+                                    
+                                    print ("Queue/Cell: \(queueIndex)/\(self.appDelegate.photoQueueImagesAvailable) updated => [q_raw: \(qSizeRawInKb)kb, q_thumb: \(qSizeThumbInKb)kb, q_time: \(qTime)s ] #\(self.appDelegate.photoQueueImagesDownloaded)")
+                                }
+                            }
+                        }
+                        
+                        // check queue final state and cleanUp cache/placeholder fragments
+                        if self.appDelegate.photoQueueImagesDownloaded == self.appDelegate.photoQueueImagesAvailable - 1 {
+                            
+                            self.pin.isDownloading = false
+                            self.toggleRefreshCollectionButton(true)
+                            self.toggleCollectionViewInfoLabel(false)
+                            self.cleanUpCollectionViewCache()
+                        }
+                    }
+                }
+                
+                self.refreshCollectionView()
+                
+            } else {
+                
+                if self.appDebugMode { print (error ?? "unknown image handler problem") }
+            }
+        }
+    }
+    
     func loadViewAdditions() {
         
-        setCollectionViewInfoLabelNoData()
-        
+        mapNoPhotosInfoLabel.text = mapMsgNoPhotosAvailable
+        mapNoPhotosInfoLabel.backgroundColor = UIColor(netHex: 0xEC2C61)
         btnRefreshPhotosForThisLocation.isEnabled = true
         mapNoPhotosInfoLabel.textColor = UIColor(netHex: 0xFFFFFF)
         mapNoPhotosInfoLabel.textAlignment = .center
