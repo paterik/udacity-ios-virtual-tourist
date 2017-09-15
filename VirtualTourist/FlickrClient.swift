@@ -47,16 +47,21 @@ class FlickrClient: NSObject {
         appDelegate.photoQueueImagesDownloaded = 0
         
         for index in 0 ... numberOfImages - 1  {
-            appDelegate.photoQueue.append(PhotoQueueObject(
+            appDelegate.photoQueue.append(PhotoQueueItem(
                 metaHash: "\(index)".md5(),
                 metaQueueIndex: index,
                 metaQueueCreatedAt: Date(),
                 metaQueueUpdatedAt: Date(),
                 metaLocationHash: targetPin.metaHash,
+                metaDownloadAsCellProcessed: false,
                 metaDownloadCompleted: false,
                 metaDownloadMsg: "download photo #\(index)",
                 metaDataSizeRaw: 0.0,
-                metaDataSizeConverted: 0.0
+                metaDataSizeConverted: 0.0,
+                imageSourceURL: nil,
+                imageJPEGRaw: nil,
+                imageJPEGConverted: nil,
+                photo: nil
             ))
         }
     }
@@ -100,6 +105,11 @@ class FlickrClient: NSObject {
                 
             } else {
             
+                var UIImageOrigin: UIImage?
+                var UIImagePreview: UIImage?
+                var sizeImageOrigin: Double = 0.0
+                var sizeImagePreview: Double = 0.0
+
                 // try to handle json result by binding specific keys (photos, photo and pages)
                 if  let photoResultDictionary = data?.value(forKey: "photos") as? [String: AnyObject],
                     let photoResultArray = photoResultDictionary["photo"] as? [[String: AnyObject]],
@@ -127,14 +137,16 @@ class FlickrClient: NSObject {
                             var queueItem = self.appDelegate.photoQueue[imageLoopIndex]
                             
                             // primary downloading process
+                            
                             self.handlePhotoByFlickrUrl(_imageUrl, _imageExpectedCount, imageLoopIndex, targetPin)
                             {
-                                (imgDataOrigin, imgDataPreview, success, error) in
+                                (_photo, imgDataOrigin, imgDataPreview, success, error) in
                                 
                                 if (error != nil) {
                                     
                                     // update queue media item (for failure)
                                     queueItem._metaDownloadCompleted = false
+                                    queueItem._metaDownloadAsCellProcessed = false
                                     queueItem._metaDownloadMsg = error?.description
                                     queueItem._metaQueueUpdatedAt = Date()
                                     
@@ -147,12 +159,27 @@ class FlickrClient: NSObject {
                                     // update queue media item (for success)
                                     let queueMsg = "-> src=\(imgDataOrigin!), min=\(imgDataPreview!), \(imageLoopIndex + 1) of \(_imageExpectedCount)"
                                     
+                                    if let _imageOrigin = _photo!.imageRaw {
+                                        UIImageOrigin = UIImage(data: _imageOrigin, scale: 1.0)
+                                        sizeImageOrigin = Double(_imageOrigin.count) / 1024.0
+                                    }
+                                    
+                                    if let _imagePreview = _photo!.imagePreview {
+                                        UIImagePreview = UIImage(data: _imagePreview, scale: 1.0)
+                                        sizeImagePreview = Double(_imagePreview.count) / 1024.0
+                                    }
+                                    
                                     queueItem._metaDownloadCompleted = true
+                                    queueItem._metaDownloadAsCellProcessed = false
                                     queueItem._metaQueueUpdatedAt = Date()
                                     queueItem._metaHash = _imageUrl.md5()
-                                    queueItem._metaDataSizeConverted = Double(imgDataPreview!.count) / 1024.0
-                                    queueItem._metaDataSizeRaw = Double(imgDataOrigin!.count) / 1024.0
+                                    queueItem._metaDataSizeConverted = sizeImagePreview
+                                    queueItem._metaDataSizeRaw = sizeImageOrigin
                                     queueItem._metaDownloadMsg = queueMsg
+                                    queueItem._imageSourceURL = _imageUrl
+                                    queueItem._imageJPEGRaw = UIImageOrigin
+                                    queueItem._imageJPEGConverted = UIImagePreview
+                                    queueItem._photo = _photo
                                     
                                     completionHandlerForFetchFlickrImages(true, nil)
                                     

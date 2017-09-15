@@ -121,13 +121,18 @@ extension FlickrClient {
        _ imageExpectedCount: Int,
        _ imageLoopIndex: Int,
        _ targetPin: Pin,
-       _ completionHandlerForPhotoProcessor: @escaping (_ imgDataOrigin: Data?, _ imgDataPreview: Data?, _ success: Bool?, _ error: String?) -> Void) {
+       _ completionHandlerForPhotoProcessor: @escaping (
+            _ photo: Photo?,
+            _ imgDataOrigin: Data?,
+            _ imgDataPreview: Data?,
+            _ success: Bool?,
+            _ error: String?) -> Void) {
         
         // give handle to ImageDownloader processor ...
         self.getDownloadedImageByFlickrUrl(imageUrl, imageExpectedCount, imageLoopIndex) { (rawImage, success, error) in
             
             if (error != nil) {
-                completionHandlerForPhotoProcessor(nil, nil, false, error)
+                completionHandlerForPhotoProcessor(nil, nil, nil, false, error)
                 if self.debugMode == true { print ("--- <failure> photo object download failed: \(String(describing: error?.description)) ---") }
                 
                 return
@@ -136,13 +141,13 @@ extension FlickrClient {
                 
                 // now http/request error? okay start processing/preparing origin image
                 guard let imageOrigin = UIImageJPEGRepresentation(rawImage!, 1) else {
-                    completionHandlerForPhotoProcessor(nil, nil, false, error); return
+                    completionHandlerForPhotoProcessor(nil, nil, nil, false, error); return
                 }
                 
                 // now process/prepare thumbnail version of primary image (65% compression, 50% downscale)
                 guard let imagePreview = UIImageJPEGRepresentation(
                     rawImage!.resized(withPercentage: self.photoPreviewDownscale)!, self.photoPreviewQuality) else {
-                    completionHandlerForPhotoProcessor(nil, nil, false, error); return
+                    completionHandlerForPhotoProcessor(nil, nil, nil, false, error); return
                 }
                 
                 // and finally persist the media using our photo entity
@@ -169,17 +174,17 @@ extension FlickrClient {
                         if transactionPhoto !== nil {
                             
                             // everything went fine! Go back to next image url provided by flickrApiGet looper :)
-                            completionHandlerForPhotoProcessor(imageOrigin, imagePreview, true, nil)
+                            completionHandlerForPhotoProcessor(transactionPhoto, imageOrigin, imagePreview, true, nil)
                             
                         } else {
                         
-                            completionHandlerForPhotoProcessor(nil, nil, false, "Oops! Unable to persist location image!")
+                            completionHandlerForPhotoProcessor(nil, nil, nil, false, "Oops! Unable to persist location image!")
                             if self.debugMode == true { print ("--- <error> photo object processing/persistence not successfuly ---") }
                         }
                         
                     },  failure: { (error) in
                     
-                        completionHandlerForPhotoProcessor(nil, nil, false, "Oops! Failure during persisting location image: \(error)!")
+                        completionHandlerForPhotoProcessor(nil, nil, nil, false, "Oops! Failure during persisting location image: \(error)!")
                         if self.debugMode == true { print ("--- <failure> photo object processing/persistence failed: \(error) ---") }
                     }
                 )
