@@ -17,7 +17,7 @@ extension MapDetailViewController {
        _ pin: Pin,
        _ completionHandlerForDeletePhotos: @escaping (_ success: Bool?, _ error: String?) -> Void) {
     
-        CoreStore.perform(
+         CoreStore.perform(
             
             asynchronous: { (transaction) -> Void in
                 
@@ -41,7 +41,7 @@ extension MapDetailViewController {
     func getPhotosForCollectionByPin (
        _ completionHandlerForFetchPhotos: @escaping (_ photos: [Photo]?, _ success: Bool?, _ error: String?) -> Void) {
         
-        CoreStore.perform(
+         CoreStore.perform(
             
             asynchronous: { (transaction) -> [Photo]? in
                 
@@ -113,11 +113,6 @@ extension MapDetailViewController {
     }
     
     func cleanUpCollectionViewCache() {
-    
-        if self.appDebugMode == true {
-            print ("===> cleanUp photoQueue <===")
-        }
-        
         for (index, photo) in appDelegate.photoQueue.enumerated() {
             if photo._metaDownloadCompleted == false {
                 if index <= appDelegate.photoQueue.count {
@@ -185,16 +180,6 @@ extension MapDetailViewController {
                                 queueObjectToUpdate._metaQueueUpdatedAt = Date()
                                 
                                 self.appDelegate.photoQueue[queueIndex] = queueObjectToUpdate
-                                
-                                // print put some statistics
-                                if self.appDebugMode == true {
-                                    
-                                    let qTime: Int = self.getSecondsBetweenTwoDates(queueItem._metaQueueCreatedAt!, queueItem._metaQueueUpdatedAt!)
-                                    let qSizeRawInKb = queueItem._metaDataSizeRaw!.rounded()
-                                    let qSizeThumbInKb = queueItem._metaDataSizeConverted!.rounded()
-                                    
-                                    print ("Queue/Cell: \(queueIndex)/\(self.appDelegate.photoQueueImagesAvailable) updated => [q_raw: \(qSizeRawInKb)kb, q_thumb: \(qSizeThumbInKb)kb, q_time: \(qTime)s ] #\(self.appDelegate.photoQueueImagesDownloaded)")
-                                }
                             }
                         }
                         
@@ -220,9 +205,10 @@ extension MapDetailViewController {
     
     func loadViewAdditions() {
         
+        btnRefreshPhotosForThisLocation.isEnabled = true
+        
         mapNoPhotosInfoLabel.text = mapMsgNoPhotosAvailable
         mapNoPhotosInfoLabel.backgroundColor = UIColor(netHex: 0xEC2C61)
-        btnRefreshPhotosForThisLocation.isEnabled = true
         mapNoPhotosInfoLabel.textColor = UIColor(netHex: 0xFFFFFF)
         mapNoPhotosInfoLabel.textAlignment = .center
         mapNoPhotosInfoLabel.isEnabled = false
@@ -231,9 +217,9 @@ extension MapDetailViewController {
         view.addSubview(mapNoPhotosInfoLabel)
         
         mapNoPhotosInfoLabel.snp.makeConstraints { (make) -> Void in
-            make.height.equalTo(50)
+            make.height.equalTo( 50 )
             make.width.equalTo(self.view)
-            make.bottom.equalTo(bottomLayoutGuide.snp.top).offset(-44)
+            make.bottom.equalTo(bottomLayoutGuide.snp.top).offset( -44 )
         }
     }
     
