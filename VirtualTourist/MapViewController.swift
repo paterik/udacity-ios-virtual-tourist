@@ -33,6 +33,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
     
     let mapLongPressDuration = 0.875
     let mapPinIdentifier = "Pin"
+    let mapPinDetailIdentifier = "locationDetail"
     let mapPinPersistedImageName = "icnMapPin_v1"
     let mapPinNewAddedImageName = "icnMapPin_v2"
     let mapPinIncompleteImageName = "icnMapPin_v3"
@@ -221,7 +222,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
-        if segue.identifier == "locationDetail" {
+        if segue.identifier == mapPinDetailIdentifier {
             
             mapView.deselectAnnotation(_pinSelected, animated: false)
             let controller = segue.destination as! MapDetailViewController
