@@ -32,8 +32,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var useLongitude: Double?
     var useLatitude: Double?
     
-    var photoQueue: [PhotoQueueObject] = []
+    var photoQueue: [PhotoQueueItem] = []
     var photoQueueImagesDownloaded: Int = 0
+    var photoQueueImagesAvailable: Int = 0
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
