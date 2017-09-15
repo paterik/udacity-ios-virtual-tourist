@@ -15,32 +15,15 @@ extension MapDetailViewController {
     
     func cleanUpCollectionCache() {
     
-        photoObjects.removeAll()
         photoDataObjects.removeAll()
         photoCellIndexRefreshed = 0
         
-        // reset async photo download/processing counter
+        // reset async photo download/processing queue
+        appDelegate.photoQueue.removeAll()
         appDelegate.photoQueueImagesDownloaded = 0
-        
-        // prepare image cache for the number of photos previously persisted for this pin
-        addCollectionPlaceHolderPhotos(photoCellIndexOldTreshold)
         
         // reload collectionView to show/refresh items
         photoCollectionView?.reloadData()
-    }
-    
-    func addCollectionPlaceHolderPhotos(_ numberOfPhotos: Int) {
-
-        // build placeholder imageStack after cleanUp old (real) image collection(s)
-        for index in 0 ... numberOfPhotos - 1  {
-            self.photoObjects.append(PhotoCellObject(
-                imageHash: "\(index)".md5(),
-                imageSourceURL: "\(index)",
-                imageOrigin: UIImage(named: "imgPhotoPlaceholder_v1"),
-                imagePreview: nil,
-                isPlaceHolder: true
-            ))
-        }
     }
     
     func deletePhotosOfCollectionByPin (
@@ -98,28 +81,6 @@ extension MapDetailViewController {
         )
     }
     
-    func convertPhotoToPhotoCellObject(_ photo: Photo) -> PhotoCellObject {
-        
-        var UIImageOrigin: UIImage?
-        var UIImagePreview: UIImage?
-        
-        if let _imageOrigin = photo.imageRaw {
-            UIImageOrigin = UIImage(data: _imageOrigin, scale: 1.0)
-        }
-        
-        if let _imagePreview = photo.imagePreview {
-            UIImagePreview = UIImage(data: _imagePreview, scale: 1.0)
-        }
-        
-        return PhotoCellObject(
-            imageHash: photo.imageHash,
-            imageSourceURL: photo.imageSourceURL,
-            imageOrigin: UIImageOrigin,
-            imagePreview: UIImagePreview,
-            isPlaceHolder: false
-        )
-    }
-    
     func setupUICollectionView() {
         
         photoCollectionView.isHidden = false
@@ -153,6 +114,18 @@ extension MapDetailViewController {
         return 0
     }
     
+    func setCollectionViewInfoLabelProcessing() {
+    
+        mapNoPhotosInfoLabel.text = mapMsgPhotosInDownload
+        mapNoPhotosInfoLabel.backgroundColor = UIColor(netHex: 0x23A7CE)
+    }
+    
+    func setCollectionViewInfoLabelNoData() {
+        
+        mapNoPhotosInfoLabel.text = mapMsgNoPhotosAvailable
+        mapNoPhotosInfoLabel.backgroundColor = UIColor(netHex: 0xEC2C61)
+    }
+    
     func loadPhotosForCollectionView(_ notification: NSNotification?) {
         
         getPhotosForCollectionByPin() {
@@ -165,56 +138,61 @@ extension MapDetailViewController {
                         
                     self.photoDataObjects = photos!
                     
+                    //
+                    // mode 1: normal loading of persisted photo stack
+                    //
                     
                     if notification == nil {
                         
                         // remove complete placeholder imageStack
-                        self.photoObjects.removeAll()
-                        for photo in self.photoDataObjects {
-                            self.photoObjects.append(self.convertPhotoToPhotoCellObject(photo))
+                        self.appDelegate.photoQueue.removeAll()
+                        for (index, photo) in self.photoDataObjects.enumerated() {
+                            self.appDelegate.photoQueue.append(photo.convertToPhotoQueueObject(index))
                         }
                     
+                    //
+                    // mode 2: event based refresh loading of new persisted photo sack
+                    //
+                        
                     } else {
                         
-                        self.mapNoPhotosInfoLabel.text = self.mapMsgPhotosInDownload
-                        self.mapNoPhotosInfoLabel.backgroundColor = UIColor(netHex: 0x23A7CE)
+                        self.setCollectionViewInfoLabelProcessing()
                         
-                        // check old photo number threshold and extend placeholder stack if necessary
-                        self.photoCellIndexNewTreshold = self.getMaxIndexOfCurrentDownloadSession(notification)
-                        if (self.photoCellIndexOldTreshold != self.photoCellIndexNewTreshold) && self.photoCellIndexFixed == false {
-                            self.addCollectionPlaceHolderPhotos(self.photoCellIndexNewTreshold - self.photoCellIndexOldTreshold)
-                            self.photoCellIndexFixed = true
-                        }
-                        
-                        // replace placeholder imageStack (step wise)
-                        let  photoCellObject: PhotoCellObject = self.convertPhotoToPhotoCellObject(self.photoDataObjects[self.photoCellIndexRefreshed])
-                        self.photoObjects[self.photoCellIndexRefreshed] = photoCellObject
-                        self.photoCellIndexRefreshed += 1
-                        
+                        // determine the maximal photo stack count available from last api request
+                        self.appDelegate.photoQueueImagesAvailable = self.getMaxIndexOfCurrentDownloadSession(notification)
                         self.appDelegate.photoQueueImagesDownloaded = 0
-                        for queueItem in self.appDelegate.photoQueue {
                         
-                            if queueItem._metaDownloadCompleted! == true {
+                        // iterate through complete image stack to fetch the latest downloaded image
+                        for (queueIndex, queueItem) in self.appDelegate.photoQueue.enumerated() {
+                        
+                            // count current download stack position to predict download finish line
+                            if queueItem._metaDownloadCompleted! == true { self.appDelegate.photoQueueImagesDownloaded += 1 }
+                            
+                            // try to fetch a photo which was downloaded but not presented as cell
+                            if  queueItem._metaDownloadCompleted! == true &&
+                                queueItem._metaDownloadAsCellProcessed == false {
                                 
-                                self.appDelegate.photoQueueImagesDownloaded += 1
+                                var queueObjectToUpdate = self.appDelegate.photoQueue[queueIndex]
+                                    queueObjectToUpdate._metaDownloadAsCellProcessed = true
+                                
+                                self.appDelegate.photoQueue[queueIndex] = queueObjectToUpdate
+                                
                                 let qTime: Int = self.getSecondsBetweenTwoDates(queueItem._metaQueueCreatedAt!, queueItem._metaQueueUpdatedAt!)
                                 let qSizeRawInKb = queueItem._metaDataSizeRaw!.rounded()
                                 let qSizeThumbInKb = queueItem._metaDataSizeConverted!.rounded()
-                                let qIndex = queueItem._metaQueueIndex!
                                 
                                 if self.appDebugMode == true {
-                                    print ("Queue: photo #\(qIndex) q_raw: \(qSizeRawInKb), q_thumb: \(qSizeThumbInKb) finished in \(qTime) sec")
+                                    print ("Queue/Cell: \(queueIndex)/\(self.appDelegate.photoQueueImagesAvailable) updated => [q_raw: \(qSizeRawInKb)kb, q_thumb: \(qSizeThumbInKb)kb, q_time: \(qTime)s ] #\(self.appDelegate.photoQueueImagesDownloaded)")
                                 }
                             }
                         }
                         
                         // check queue final state and cleanUp cache/placeholder fragments
-                        if self.appDelegate.photoQueueImagesDownloaded == self.photoCellIndexNewTreshold {
+                        if self.appDelegate.photoQueueImagesDownloaded == self.appDelegate.photoQueueImagesAvailable - 1 {
                         
                             self.pin.isDownloading = false
                             self.toggleRefreshCollectionButton(true)
-                            self.toggleNoPhotosFoundInfoBox(false)
-                            self.cleanUpCollectionViewCache()
+                            self.toggleCollectionViewInfoLabel(false)
                         }
                     }
                 }
@@ -242,13 +220,13 @@ extension MapDetailViewController {
     func cleanUpCollectionViewCache() {
     
         if self.appDebugMode == true {
-            print ("===> cleanUp collectionView ...")
+            print ("===> cleanUp photoQueue <===")
         }
         
-        for (index, photo) in photoObjects.enumerated() {
-            if photo.isPlaceHolder {
-                if index <= self.photoObjects.count {
-                    photoObjects.remove(at: index)
+        for (index, photo) in appDelegate.photoQueue.enumerated() {
+            if photo._metaDownloadCompleted == false {
+                if index <= appDelegate.photoQueue.count {
+                    appDelegate.photoQueue.remove(at: index)
                 }
             }
         }
@@ -256,10 +234,9 @@ extension MapDetailViewController {
     
     func loadViewAdditions() {
         
-        btnRefreshPhotosForThisLocation.isEnabled = true
+        setCollectionViewInfoLabelNoData()
         
-        mapNoPhotosInfoLabel.text = mapMsgNoPhotosAvailable
-        mapNoPhotosInfoLabel.backgroundColor = UIColor(netHex: 0xEC2C61)
+        btnRefreshPhotosForThisLocation.isEnabled = true
         mapNoPhotosInfoLabel.textColor = UIColor(netHex: 0xFFFFFF)
         mapNoPhotosInfoLabel.textAlignment = .center
         mapNoPhotosInfoLabel.isEnabled = false
@@ -274,7 +251,7 @@ extension MapDetailViewController {
         }
     }
     
-    func toggleNoPhotosFoundInfoBox(_ enabled: Bool) {
+    func toggleCollectionViewInfoLabel(_ enabled: Bool) {
         
         mapNoPhotosInfoLabel.isEnabled = enabled
         mapNoPhotosInfoLabel.isHidden = !enabled
@@ -293,13 +270,13 @@ extension MapDetailViewController {
             
         } else {
             
-            toggleNoPhotosFoundInfoBox(true)
+            toggleCollectionViewInfoLabel(true)
             
         }
     }
     
     func isDataAvailable() -> Bool {
         
-        return photoObjects.count > 0
+        return appDelegate.photoQueue.count > 0
     }
 }

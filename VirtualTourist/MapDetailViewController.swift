@@ -45,7 +45,6 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
     
     var pin: Pin!
     var photoDataObjects = [Photo]()
-    var photoObjects = [PhotoCellObject]()
     var photoCellIndexRefreshed: Int = 0
     var photoCellIndexNewTreshold: Int = 0
     var photoCellIndexOldTreshold: Int = 0
@@ -87,7 +86,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
        _ collectionView: UICollectionView,
          numberOfItemsInSection section: Int) -> Int {
         
-        return photoObjects.count
+        return appDelegate.photoQueue.count
     }
     
     func collectionView(
@@ -98,7 +97,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
             withReuseIdentifier: collectionViewCellIdentifier,
             for: indexPath) as! FlickrCell
         
-        let photo = photoObjects[indexPath.row]
+        let photo = appDelegate.photoQueue[indexPath.row]
         
         //
         // handle image for corresponding cell, try to load preview image first
@@ -109,19 +108,19 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         cell.activityIndicator.stopAnimating()
         cell.activityIndicator.isHidden = true
         
-        if photo.isPlaceHolder || (photo.imageOrigin == nil && photo.imagePreview == nil) {
+        if photo._metaDownloadCompleted == false || (photo._imageJPEGRaw == nil && photo._imageJPEGConverted == nil) {
         
             cell.imageView.image = UIImage(named: "imgPhotoPlaceholder_v1")
             cell.activityIndicator.startAnimating()
             cell.activityIndicator.isHidden = false
         
-        } else if photo.imagePreview != nil {
+        } else if photo._imageJPEGConverted != nil {
             
-            cell.imageView.image = photo.imagePreview
+            cell.imageView.image = photo._imageJPEGConverted
             
-        } else if photo.imageOrigin != nil {
+        } else if photo._imageJPEGRaw != nil {
             
-            cell.imageView.image = photo.imageOrigin
+            cell.imageView.image = photo._imageJPEGRaw
             
         }
         
