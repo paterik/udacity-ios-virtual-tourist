@@ -176,8 +176,8 @@ extension MapDetailViewController {
                                 queueItem._metaDownloadAsCellProcessed == false {
                                 
                                 var queueObjectToUpdate = self.appDelegate.photoQueue[queueIndex]
-                                queueObjectToUpdate._metaDownloadAsCellProcessed = true
-                                queueObjectToUpdate._metaQueueUpdatedAt = Date()
+                                    queueObjectToUpdate._metaDownloadAsCellProcessed = true
+                                    queueObjectToUpdate._metaQueueUpdatedAt = Date()
                                 
                                 self.appDelegate.photoQueue[queueIndex] = queueObjectToUpdate
                             }

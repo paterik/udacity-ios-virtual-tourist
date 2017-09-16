@@ -91,7 +91,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
             withReuseIdentifier: collectionViewCellIdentifier,
             for: indexPath) as! FlickrCell
         
-        let photo = appDelegate.photoQueue[indexPath.row]
+        let photoQueueItem = appDelegate.photoQueue[indexPath.row]
         
         //
         // handle image for corresponding cell, try to load preview image first
@@ -102,23 +102,33 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         cell.activityIndicator.stopAnimating()
         cell.activityIndicator.isHidden = true
         
-        if photo._metaDownloadCompleted == false || (photo._imageJPEGRaw == nil && photo._imageJPEGConverted == nil) {
+        if  photoQueueItem._metaDownloadCompleted == false
+            || (photoQueueItem._imageJPEGRaw == nil && photoQueueItem._imageJPEGConverted == nil) {
         
             cell.imageView.image = UIImage(named: "imgPhotoPlaceholder_v1")
             cell.activityIndicator.startAnimating()
             cell.activityIndicator.isHidden = false
         
-        } else if photo._imageJPEGConverted != nil {
+        } else {
             
-            cell.imageView.image = photo._imageJPEGConverted
-            
-        } else if photo._imageJPEGRaw != nil {
-            
-            cell.imageView.image = photo._imageJPEGRaw
-            
+            cell.imageView.image = getCellImageForPhoto(photoQueueItem)
         }
         
         return cell
+    }
+    
+    func getCellImageForPhoto(_ photoQueueItem: PhotoQueueItem) -> UIImage {
+        
+        if photoQueueItem._imageJPEGConverted != nil {
+            
+            return photoQueueItem._imageJPEGConverted!
+            
+        } else if photoQueueItem._imageJPEGRaw != nil {
+            
+            return photoQueueItem._imageJPEGRaw!
+        }
+        
+        return UIImage(named: "imgPhotoPlaceholder_v1")!
     }
     
     func collectionView(
@@ -149,6 +159,29 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
             width  : collectionCellWidth,
             height : collectionCellHeight
         )
+    }
+    
+    func collectionView(
+       _ collectionView: UICollectionView,
+         didSelectItemAt indexPath: IndexPath) {
+    
+        let selectedCell = collectionView.cellForItem(at: indexPath) as! FlickrCell
+        var cellObjectToUpdate = self.appDelegate.photoQueue[indexPath.row]
+            cellObjectToUpdate._imageCellSelected = !cellObjectToUpdate._imageCellSelected!
+        
+        selectedCell.imageView.image = getCellImageForPhoto(cellObjectToUpdate)
+        var dbgStatus = "deselected"
+        if  cellObjectToUpdate._imageCellSelected! {
+            selectedCell.imageView.image = getCellImageForPhoto(cellObjectToUpdate).alpha(0.5)
+            dbgStatus = "selected"
+        }
+        
+        if appDebugMode == true {
+            print ("photo [\(cellObjectToUpdate._imageSourceURL!)] selected at position \(indexPath.row), status=\(dbgStatus)")
+        }
+        
+        self.appDelegate.photoQueue[indexPath.row] = cellObjectToUpdate
+        
     }
     
     //

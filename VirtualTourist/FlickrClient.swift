@@ -61,6 +61,7 @@ class FlickrClient: NSObject {
                 imageSourceURL: nil,
                 imageJPEGRaw: nil,
                 imageJPEGConverted: nil,
+                imageCellSelected: false,
                 photo: nil
             ))
         }

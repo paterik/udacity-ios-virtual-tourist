@@ -24,6 +24,7 @@ struct PhotoQueueItem {
     var _imageSourceURL: String?
     var _imageJPEGRaw: UIImage?
     var _imageJPEGConverted: UIImage?
+    var _imageCellSelected: Bool?
     var _photo: Photo?
     
     init(metaHash: String?,
@@ -39,6 +40,7 @@ struct PhotoQueueItem {
          imageSourceURL: String?,
          imageJPEGRaw: UIImage?,
          imageJPEGConverted: UIImage?,
+         imageCellSelected: Bool?,
          photo: Photo?) {
         
         self._metaHash = metaHash
@@ -54,6 +56,7 @@ struct PhotoQueueItem {
         self._imageSourceURL = imageSourceURL
         self._imageJPEGRaw = imageJPEGRaw
         self._imageJPEGConverted = imageJPEGConverted
+        self._imageCellSelected = imageCellSelected
         self._photo = photo
         
     }

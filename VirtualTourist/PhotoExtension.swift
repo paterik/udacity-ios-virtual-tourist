@@ -42,6 +42,7 @@ extension Photo {
             imageSourceURL: self.imageSourceURL,
             imageJPEGRaw: UIImageOrigin,
             imageJPEGConverted: UIImagePreview,
+            imageCellSelected: false,
             photo: self
         )
     }
