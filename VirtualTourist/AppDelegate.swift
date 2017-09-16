@@ -17,7 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     let pinPhotoDownloadedNotification = "pinPhotoDownloadedNotification"
     // notification tag for photostack download completed (all photos finished)
     let pinPhotoDownloadedCompleteNotification = "pinPhotoDownloadedCompleteNotification"
-    // maximum number of photos each collectionView can present at once
+    // maximum number of photos each collectionView can present at once (max should be 21!)
     let pinMaxNumberOfPhotos = 21
     
     //
