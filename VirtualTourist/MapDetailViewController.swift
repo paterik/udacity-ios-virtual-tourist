@@ -37,6 +37,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
     let mapNoPhotosInfoLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
     let mapMsgNoPhotosAvailable = "There are no photos available for this location"
     let collectionViewCellIdentifier = "flickrCell"
+    let cellPhotoImagePlaceholder = "imgPhotoPlaceholder_v1"
     let cellPhotoImageAlphaForSelected: CGFloat = 0.5
     
     var selectedIndexes = [IndexPath]()
@@ -108,7 +109,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         if  photoQueueItem._metaDownloadCompleted == false
             || (photoQueueItem._imageJPEGRaw == nil && photoQueueItem._imageJPEGConverted == nil) {
         
-            cell.imageView.image = UIImage(named: "imgPhotoPlaceholder_v1")
+            cell.imageView.image = UIImage(named: cellPhotoImagePlaceholder)
             cell.activityIndicator.startAnimating()
             cell.activityIndicator.isHidden = false
         

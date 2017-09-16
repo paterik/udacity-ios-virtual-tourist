@@ -111,7 +111,7 @@ extension MapDetailViewController {
     func getCellImageForPhoto(
        _ photoQueueItem: PhotoQueueItem) -> UIImage {
         
-        var cellPhotoImage: UIImage = UIImage(named: "imgPhotoPlaceholder_v1")!
+        var cellPhotoImage: UIImage = UIImage(named: cellPhotoImagePlaceholder)!
         
         if  photoQueueItem._metaDownloadCompleted! &&
             photoQueueItem._imageJPEGConverted != nil {
