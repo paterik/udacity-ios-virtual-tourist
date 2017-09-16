@@ -13,6 +13,31 @@ import MapKit
 
 extension MapDetailViewController {
     
+    func deletePhotosOfCollectionByMetaHash(
+       _ photoMetaHash: String,
+       _ completionHandlerForDeletePhotos: @escaping (_ success: Bool?, _ error: String?) -> Void) {
+    
+         CoreStore.perform(
+            
+            asynchronous: { (transaction) -> Void in
+                
+                transaction.deleteAll(From<Photo>(), Where("imageHash", isEqualTo: photoMetaHash))
+            },
+            
+            success: { _ in
+                
+                completionHandlerForDeletePhotos(true, nil)
+            },
+            
+            failure: { (error) in
+                
+                completionHandlerForDeletePhotos(false, error.localizedDescription)
+                
+                return
+            }
+        )
+    }
+    
     func deletePhotosOfCollectionByPin (
        _ pin: Pin,
        _ completionHandlerForDeletePhotos: @escaping (_ success: Bool?, _ error: String?) -> Void) {
@@ -88,11 +113,13 @@ extension MapDetailViewController {
         
         var cellPhotoImage: UIImage = UIImage(named: "imgPhotoPlaceholder_v1")!
         
-        if photoQueueItem._imageJPEGConverted != nil {
+        if  photoQueueItem._metaDownloadCompleted! &&
+            photoQueueItem._imageJPEGConverted != nil {
             
             cellPhotoImage = photoQueueItem._imageJPEGConverted!
             
-        } else if photoQueueItem._imageJPEGRaw != nil {
+        } else if photoQueueItem._metaDownloadCompleted! &&
+                  photoQueueItem._imageJPEGRaw != nil {
             
             cellPhotoImage = photoQueueItem._imageJPEGRaw!
         }
@@ -263,6 +290,7 @@ extension MapDetailViewController {
     func toggleRefreshCollectionButton(_ enabled: Bool) {
         
         btnRefreshPhotosForThisLocation.isEnabled = enabled
+        setupUIReloadButton()
     }
     
     func addCellIndexToSelection (

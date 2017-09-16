@@ -128,8 +128,10 @@ class FlickrClient: NSObject {
                         
                         // calculate the maximum number of photos available for this location
                         let _imageExpectedCount = photoResultArray.count
+                        
                         // prepare imageQueue stack
                         self.setImageQueue(_imageExpectedCount, targetPin)
+                        
                         // loop through image urls and start photo processing
                         for (imageLoopIndex, photoDictionary) in photoResultArray.enumerated() {
                         

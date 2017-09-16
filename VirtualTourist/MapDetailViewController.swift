@@ -216,51 +216,159 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         dismiss(animated: true, completion: nil)
     }
     
-    @IBAction func btnReloadPhotoCollection(_ sender: Any) {
-        
-        if selectedIndexes.count > 0 && selectedIndexes.count < appDelegate.pinMaxNumberOfPhotos {
-        
-            print ("single photo replacement called ... return")
+    func replacePhotosOfCollectionFromSelection() {
+    
+        for (_, indexPath) in selectedIndexes.enumerated() {
+            print ("=> replace index \(indexPath.row) from stack")
             
-            return
+            let updatedCell = photoCollectionView.cellForItem(at: indexPath) as! FlickrCell
+            var cellObjectToUpdate = self.appDelegate.photoQueue[indexPath.row]
+                cellObjectToUpdate._metaDownloadCompleted = false
+
+            updatedCell.imageView.image = getCellImageForPhoto(cellObjectToUpdate)
+            updatedCell.activityIndicator.startAnimating()
+            updatedCell.activityIndicator.isHidden = false
+            
+            self.appDelegate.photoQueue[indexPath.row] = cellObjectToUpdate
         }
         
-        // deactivate reload collection button after action call
-        toggleRefreshCollectionButton(false)
+        toggleRefreshCollectionButton(true)
+        refreshCollectionView()
+    }
+    
+    func deletePhotosOfCollectionBySelection() {
         
-        let alert = UIAlertController(
-            title: "Delete Collection",
-            message: "Do you really want to refresh this collection by loading new images?",
-            preferredStyle: .alert
-        )
-        
-        alert.addAction(UIAlertAction(title: "No, Cancel!", style: .default, handler: nil))
-        alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction) in
+        for (_, indexPath) in selectedIndexes.enumerated() {
             
-            self.deletePhotosOfCollectionByPin(self.pin) {
+            let updatedCell = photoCollectionView.cellForItem(at: indexPath) as! FlickrCell
+            var cellObjectToUpdate = self.appDelegate.photoQueue[indexPath.row]
+                cellObjectToUpdate._metaDownloadCompleted = false
+                appDelegate.photoQueue[indexPath.row] = cellObjectToUpdate
+            
+            updatedCell.imageView.image = getCellImageForPhoto(cellObjectToUpdate)
+            updatedCell.activityIndicator.startAnimating()
+            updatedCell.activityIndicator.isHidden = false
+            
+            print ("=> delete index \(indexPath.row) from stack using metaHash \(cellObjectToUpdate._metaHash!), count=\(self.appDelegate.photoQueue.count)")
+            self.deletePhotosOfCollectionByMetaHash(cellObjectToUpdate._metaHash!) {
                 
                 (success, error) in
                 
                 // delete successfully done?
                 if error == nil {
                     
-                    // clean collection view cache and load preset images
-                    self.cleanUpCollectionCache()
+                    self.appDelegate.photoQueue.remove(at: indexPath.row)
+                    self.removeCellIndexFromSelection(indexPath)
+                    self.loadPhotosForCollectionView(nil)
+                    self.refreshCollectionView()
+                
+                }
+            }
+        }
+        
+        toggleRefreshCollectionButton(true)
+        
+    }
+    
+    func resetSelectionForCollectionView() {
+    
+        for (_, indexPath) in selectedIndexes.enumerated() {
+            print ("=> reset index \(indexPath.row) from stack")
+            removeCellIndexFromSelection(indexPath)
+            
+            let updatedCell = photoCollectionView.cellForItem(at: indexPath) as! FlickrCell
+            var cellObjectToUpdate = self.appDelegate.photoQueue[indexPath.row]
+                cellObjectToUpdate._metaDownloadCompleted = true
+                cellObjectToUpdate._imageCellSelected = false
+            
+            updatedCell.imageView.image = getCellImageForPhoto(cellObjectToUpdate)
+            updatedCell.activityIndicator.stopAnimating()
+            updatedCell.activityIndicator.isHidden = true
+            
+            appDelegate.photoQueue[indexPath.row] = cellObjectToUpdate
+        }
+        
+        toggleRefreshCollectionButton(true)
+    }
+    
+    @IBAction func btnReloadPhotoCollection(_ sender: Any) {
+        
+        // deactivate reload collection button after action call
+        toggleRefreshCollectionButton(false)
+        
+        if selectedIndexes.count > 0 && selectedIndexes.count < appDelegate.pinMaxNumberOfPhotos {
+            
+            var _title: String   = "Replace \(selectedIndexes.count) Photos"
+            var _message: String = "Do you want to replace the \(selectedIndexes.count) photos by new ones or just delete them?"
+            var _btnTitleDelete: String = "DELETE \(selectedIndexes.count) photos"
+            var _btnTitleReplace: String = "Replace \(selectedIndexes.count) photos"
+            
+            if selectedIndexes.count == 1 {
+                _title = "Replace this Photo"
+                _message = "Do you want to replace this photo by new one or just delete it?"
+                _btnTitleDelete = "DELETE this photo"
+                _btnTitleReplace = "REPLACE this photo"
+            }
+            
+            let alert = UIAlertController(
+                title: _title,
+                message: _message,
+                preferredStyle: .alert
+            )
+            
+            alert.addAction(UIAlertAction(title: "No, Cancel!", style: .default, handler: { (action: UIAlertAction) in
+                self.resetSelectionForCollectionView()
+            }))
+            
+            alert.addAction(UIAlertAction(title: _btnTitleReplace, style: .default, handler: { (action: UIAlertAction) in
+                self.replacePhotosOfCollectionFromSelection()
+            }))
+            
+            alert.addAction(UIAlertAction(title: _btnTitleDelete, style: .default, handler: { (action: UIAlertAction) in
+                self.deletePhotosOfCollectionBySelection()
+            }))
+            
+            present(alert, animated: true, completion: nil)
+            
+        } else {
+        
+            let alert = UIAlertController(
+                title: "Delete Collection",
+                message: "Do you really want to refresh this collection by loading new images?",
+                preferredStyle: .alert
+            )
+            
+            alert.addAction(UIAlertAction(title: "No, Cancel!", style: .default, handler: { (action: UIAlertAction) in
+                self.toggleRefreshCollectionButton(true)
+            }))
+            
+            alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction) in
+                
+                self.deletePhotosOfCollectionByPin(self.pin) {
                     
-                    // load new imageSet using flickr api call
-                    self.flickrClient.getImagesByMapPin (self.pin!, nil) {
+                    (success, error) in
+                    
+                    // delete successfully done?
+                    if error == nil {
                         
-                        (success, error) in
+                        // clean collection view cache and load preset images
+                        self.cleanUpCollectionCache()
                         
-                        if success == false || error != nil {
+                        // load new imageSet using flickr api call
+                        self.flickrClient.getImagesByMapPin (self.pin!, nil) {
                             
-                            self._handleErrorAsSimpleDialog("Error", error?.description ?? "unkown error occurred")
+                            (success, error) in
+                            
+                            if success == false || error != nil {
+                                
+                                self._handleErrorAsSimpleDialog("Error", error?.description ?? "unkown error occurred")
+                            }
                         }
                     }
                 }
-            }
-        }))
-        
-        present(alert, animated: true, completion: nil)
+            }))
+            
+            present(alert, animated: true, completion: nil)
+        }
     }
 }
