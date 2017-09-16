@@ -309,32 +309,6 @@ extension MapDetailViewController {
         }
     }
     
-    func replacePhotosOfCollectionFromSelection() {
-        
-        for (_, indexPath) in selectedIndexes.enumerated() {
-            
-            let updatedCell = photoCollectionView.cellForItem(at: indexPath) as! FlickrCell
-            var cellObjectToUpdate = self.appDelegate.photoQueue[indexPath.row]
-                cellObjectToUpdate._metaDownloadCompleted = false
-                self.appDelegate.photoQueue[indexPath.row] = cellObjectToUpdate
-            
-            updatedCell.imageView.image = getCellImageForPhoto(cellObjectToUpdate)
-            updatedCell.activityIndicator.startAnimating()
-            updatedCell.activityIndicator.isHidden = false
-            
-            if appDebugMode == true {
-                print ("=> replace index \(indexPath.row) from stack")
-            }
-            
-            // 1. delete photos
-            // 2. flickr call to fetch photo replacement (prevent placeholder fillup!)
-            // 3. reload/reset/redraw collection view
-        }
-        
-        toggleRefreshCollectionButton(true)
-        refreshCollectionView()
-    }
-    
     func deletePhotosOfCollectionBySelection() {
         
         for (_, indexPath) in selectedIndexes.enumerated() {
@@ -358,11 +332,9 @@ extension MapDetailViewController {
                 
                 // delete successfully done?
                 if error == nil {
-                    
-                    self.appDelegate.photoQueue.remove(at: indexPath.row)
+
                     self.removeCellIndexFromSelection(indexPath)
                     self.loadPhotosForCollectionView(nil)
-                    self.refreshCollectionView()
                     self.toggleRefreshCollectionButton(true)
                 }
             }
@@ -397,7 +369,7 @@ extension MapDetailViewController {
         toggleRefreshCollectionButton(false)
         
         let alert = UIAlertController(
-            title: "Delete Collection",
+            title: "Delete All Photos",
             message: "Do you really want to refresh this collection by loading new images?",
             preferredStyle: .alert
         )
@@ -439,16 +411,14 @@ extension MapDetailViewController {
         
         toggleRefreshCollectionButton(false)
         
-        var _title: String   = "Replace \(selectedIndexes.count) Photos"
-        var _message: String = "Do you want to replace the \(selectedIndexes.count) photos by new ones or just delete them?"
-        var _btnTitleDelete: String = "DELETE \(selectedIndexes.count) photos"
-        var _btnTitleReplace: String = "REPLACE \(selectedIndexes.count) photos"
+        var _title: String   = "Delete \(selectedIndexes.count) Photos"
+        var _message: String = "Do you want to delete \(selectedIndexes.count) photos?"
+        var _btnTitleDelete: String = "Delete \(selectedIndexes.count) photos"
         
         if selectedIndexes.count == 1 {
-            _title = "Replace this Photo"
-            _message = "Do you want to replace this photo by new one or just delete it?"
-            _btnTitleDelete = "DELETE this photo"
-            _btnTitleReplace = "REPLACE this photo"
+            _title = "Delete this Photo"
+            _message = "Do you want to delete this photo?"
+            _btnTitleDelete = "Delete this photo"
         }
         
         let alert = UIAlertController(
@@ -459,10 +429,6 @@ extension MapDetailViewController {
         
         alert.addAction(UIAlertAction(title: "No, Cancel!", style: .default, handler: { (action: UIAlertAction) in
             self.resetSelectionForCollectionView()
-        }))
-        
-        alert.addAction(UIAlertAction(title: _btnTitleReplace, style: .default, handler: { (action: UIAlertAction) in
-            self.replacePhotosOfCollectionFromSelection()
         }))
         
         alert.addAction(UIAlertAction(title: _btnTitleDelete, style: .default, handler: { (action: UIAlertAction) in
@@ -481,7 +447,6 @@ extension MapDetailViewController {
         } else {
             
             toggleCollectionViewInfoLabel(true)
-            
         }
     }
     
