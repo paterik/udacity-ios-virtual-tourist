@@ -83,6 +83,28 @@ extension MapDetailViewController {
         return 0
     }
     
+    func getCellImageForPhoto(
+       _ photoQueueItem: PhotoQueueItem) -> UIImage {
+        
+        var cellPhotoImage: UIImage = UIImage(named: "imgPhotoPlaceholder_v1")!
+        
+        if photoQueueItem._imageJPEGConverted != nil {
+            
+            cellPhotoImage = photoQueueItem._imageJPEGConverted!
+            
+        } else if photoQueueItem._imageJPEGRaw != nil {
+            
+            cellPhotoImage = photoQueueItem._imageJPEGRaw!
+        }
+        
+        cellPhotoImage = cellPhotoImage.alpha(1)
+        if  photoQueueItem._imageCellSelected! {
+            cellPhotoImage = cellPhotoImage.alpha(cellPhotoImageAlphaForSelected)
+        }
+        
+        return cellPhotoImage
+    }
+    
     func setupUICollectionView() {
         
         photoCollectionView.isHidden = false
@@ -99,6 +121,16 @@ extension MapDetailViewController {
         miniMapView.setRegion(pinRegion, animated: true)
         miniMapView.setCenter(pin.coordinate, animated: true)
         miniMapView.addAnnotation(pin)
+    }
+    
+    func setupUIReloadButton() {
+        
+        btnRefreshPhotosForThisLocation.image = UIImage(named: "icnRefresh_v2")
+        let numberOfSelections: Int = selectedIndexes.count
+        if  numberOfSelections > 0 && numberOfSelections <= appDelegate.pinMaxNumberOfPhotos {
+            
+            btnRefreshPhotosForThisLocation.image = UIImage(named: "icnRefresh_v2_n\(numberOfSelections)")
+        }
     }
     
     func getSecondsBetweenTwoDates(

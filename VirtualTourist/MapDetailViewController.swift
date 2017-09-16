@@ -37,6 +37,23 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
     let mapNoPhotosInfoLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
     let mapMsgNoPhotosAvailable = "There are no photos available for this location"
     let collectionViewCellIdentifier = "flickrCell"
+    let cellPhotoImageAlphaForSelected: CGFloat = 0.5
+    
+    var selectedIndexes = [IndexPath]()
+    
+    func addCellIndexToSelection (_ indexPath: IndexPath) {
+        
+        selectedIndexes.append(indexPath)
+    }
+    
+    func removeCellIndexFromSelection (_ indexPath: IndexPath) {
+        
+        for (index, indexPathValue) in selectedIndexes.enumerated() {
+            if indexPathValue == indexPath {
+                selectedIndexes.remove(at: index); return
+            }
+        }
+    }
     
     //
     // MARK: Class Variables
@@ -117,20 +134,6 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         return cell
     }
     
-    func getCellImageForPhoto(_ photoQueueItem: PhotoQueueItem) -> UIImage {
-        
-        if photoQueueItem._imageJPEGConverted != nil {
-            
-            return photoQueueItem._imageJPEGConverted!
-            
-        } else if photoQueueItem._imageJPEGRaw != nil {
-            
-            return photoQueueItem._imageJPEGRaw!
-        }
-        
-        return UIImage(named: "imgPhotoPlaceholder_v1")!
-    }
-    
     func collectionView(
        _ collectionView: UICollectionView,
          layout collectionViewLayout: UICollectionViewLayout,
@@ -172,16 +175,22 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         selectedCell.imageView.image = getCellImageForPhoto(cellObjectToUpdate)
         var dbgStatus = "deselected"
         if  cellObjectToUpdate._imageCellSelected! {
-            selectedCell.imageView.image = getCellImageForPhoto(cellObjectToUpdate).alpha(0.5)
             dbgStatus = "selected"
+            
+            addCellIndexToSelection(indexPath)
+            
+        } else {
+            
+            removeCellIndexFromSelection(indexPath)
         }
+        
+        setupUIReloadButton()
         
         if appDebugMode == true {
             print ("photo [\(cellObjectToUpdate._imageSourceURL!)] selected at position \(indexPath.row), status=\(dbgStatus)")
         }
         
         self.appDelegate.photoQueue[indexPath.row] = cellObjectToUpdate
-        
     }
     
     //
