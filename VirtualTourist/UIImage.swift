@@ -11,6 +11,17 @@ import UIKit
 
 extension UIImage {
     
+    func alpha(_ value: CGFloat) -> UIImage {
+        
+        UIGraphicsBeginImageContextWithOptions(size, false, scale)
+        draw(at: CGPoint.zero, blendMode: .normal, alpha: value)
+        
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return newImage!
+    }
+    
     func resized(withPercentage percentage: CGFloat) -> UIImage? {
         
         let canvasSize = CGSize(width: size.width * percentage, height: size.height * percentage)
