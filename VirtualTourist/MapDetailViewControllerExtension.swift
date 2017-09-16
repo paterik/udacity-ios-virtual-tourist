@@ -313,8 +313,6 @@ extension MapDetailViewController {
         
         for (_, indexPath) in selectedIndexes.enumerated() {
             
-            if appDebugMode == true { print ("=> replace index \(indexPath.row) from stack") }
-            
             let updatedCell = photoCollectionView.cellForItem(at: indexPath) as! FlickrCell
             var cellObjectToUpdate = self.appDelegate.photoQueue[indexPath.row]
                 cellObjectToUpdate._metaDownloadCompleted = false
@@ -323,6 +321,14 @@ extension MapDetailViewController {
             updatedCell.imageView.image = getCellImageForPhoto(cellObjectToUpdate)
             updatedCell.activityIndicator.startAnimating()
             updatedCell.activityIndicator.isHidden = false
+            
+            if appDebugMode == true {
+                print ("=> replace index \(indexPath.row) from stack")
+            }
+            
+            // 1. delete photos
+            // 2. flickr call to fetch photo replacement (prevent placeholder fillup!)
+            // 3. reload/reset/redraw collection view
         }
         
         toggleRefreshCollectionButton(true)

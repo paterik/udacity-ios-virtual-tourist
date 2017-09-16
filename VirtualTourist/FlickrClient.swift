@@ -162,12 +162,12 @@ class FlickrClient: NSObject {
                                     // update queue media item (for success)
                                     let queueMsg = "-> src=\(imgDataOrigin!), min=\(imgDataPreview!), \(imageLoopIndex + 1) of \(_imageExpectedCount)"
                                     
-                                    if let _imageOrigin = _photo!.imageRaw {
+                                    if  let _imageOrigin = _photo!.imageRaw {
                                         UIImageOrigin = UIImage(data: _imageOrigin, scale: 1.0)
                                         sizeImageOrigin = Double(_imageOrigin.count) / 1024.0
                                     }
                                     
-                                    if let _imagePreview = _photo!.imagePreview {
+                                    if  let _imagePreview = _photo!.imagePreview {
                                         UIImagePreview = UIImage(data: _imagePreview, scale: 1.0)
                                         sizeImagePreview = Double(_imagePreview.count) / 1024.0
                                     }

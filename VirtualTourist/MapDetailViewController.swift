@@ -38,7 +38,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
     let mapMsgNoPhotosAvailable = "There are no photos available for this location"
     let collectionViewCellIdentifier = "flickrCell"
     let cellPhotoImagePlaceholder = "imgPhotoPlaceholder_v1"
-    let cellPhotoImageAlphaForSelected: CGFloat = 0.5
+    let cellPhotoImageAlphaForSelected: CGFloat = 0.475
     
     var selectedIndexes = [IndexPath]()
     
@@ -106,8 +106,8 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         cell.activityIndicator.stopAnimating()
         cell.activityIndicator.isHidden = true
         
-        if  photoQueueItem._metaDownloadCompleted == false
-            || (photoQueueItem._imageJPEGRaw == nil && photoQueueItem._imageJPEGConverted == nil) {
+        if  photoQueueItem._metaDownloadCompleted == false ||
+           (photoQueueItem._imageJPEGRaw == nil && photoQueueItem._imageJPEGConverted == nil) {
         
             cell.imageView.image = UIImage(named: cellPhotoImagePlaceholder)
             cell.activityIndicator.startAnimating()
@@ -169,9 +169,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         } else {
             
             removeCellIndexFromSelection(indexPath)
-        }
-        
-        setupUIReloadButton()
+        };  setupUIReloadButton()
         
         if appDebugMode == true {
             print ("photo [\(cellObjectToUpdate._imageSourceURL!)] selected at position \(indexPath.row), status=\(dbgStatus)")
