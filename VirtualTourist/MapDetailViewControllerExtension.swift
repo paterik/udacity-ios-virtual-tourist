@@ -144,6 +144,7 @@ extension MapDetailViewController {
         return datecomponenets.second!
     }
     
+    // obsolete, will be removed in future version (#R.1001)
     func cleanUpCollectionViewCache() {
         for (index, photo) in appDelegate.photoQueue.enumerated() {
             if photo._metaDownloadCompleted == false {
@@ -220,9 +221,7 @@ extension MapDetailViewController {
                             
                             self.pin.isDownloading = false
                             self.toggleRefreshCollectionButton(true)
-                            self.toggleCollectionViewInfoLabel(false)
-                            self.cleanUpCollectionViewCache()
-                        }
+                            self.toggleCollectionViewInfoLabel(false)                        }
                     }
                 }
                 
@@ -264,6 +263,22 @@ extension MapDetailViewController {
     func toggleRefreshCollectionButton(_ enabled: Bool) {
         
         btnRefreshPhotosForThisLocation.isEnabled = enabled
+    }
+    
+    func addCellIndexToSelection (
+       _ indexPath: IndexPath) {
+        
+        selectedIndexes.append(indexPath)
+    }
+    
+    func removeCellIndexFromSelection (
+       _ indexPath: IndexPath) {
+        
+        for (index, indexPathValue) in selectedIndexes.enumerated() {
+            if indexPathValue == indexPath {
+                selectedIndexes.remove(at: index); return
+            }
+        }
     }
     
     func refreshCollectionView() {

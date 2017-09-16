@@ -41,20 +41,6 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
     
     var selectedIndexes = [IndexPath]()
     
-    func addCellIndexToSelection (_ indexPath: IndexPath) {
-        
-        selectedIndexes.append(indexPath)
-    }
-    
-    func removeCellIndexFromSelection (_ indexPath: IndexPath) {
-        
-        for (index, indexPathValue) in selectedIndexes.enumerated() {
-            if indexPathValue == indexPath {
-                selectedIndexes.remove(at: index); return
-            }
-        }
-    }
-    
     //
     // MARK: Class Variables
     //
@@ -231,6 +217,13 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
     }
     
     @IBAction func btnReloadPhotoCollection(_ sender: Any) {
+        
+        if selectedIndexes.count > 0 && selectedIndexes.count < appDelegate.pinMaxNumberOfPhotos {
+        
+            print ("single photo replacement called ... return")
+            
+            return
+        }
         
         // deactivate reload collection button after action call
         toggleRefreshCollectionButton(false)
