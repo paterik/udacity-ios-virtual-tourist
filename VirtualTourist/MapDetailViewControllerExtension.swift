@@ -367,7 +367,7 @@ extension MapDetailViewController {
         toggleRefreshCollectionButton(false)
         
         let alert = UIAlertController(
-            title: "Delete All Photos",
+            title: "Reset All Photos",
             message: "Do you really want to refresh this collection by loading new images?",
             preferredStyle: .alert
         )

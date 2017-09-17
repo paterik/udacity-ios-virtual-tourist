@@ -5,7 +5,6 @@ use_frameworks!
 
 def uiLibs
     pod 'BGTableViewRowActionWithImage'
-    pod 'YNDropDownMenu'
     pod 'SnapKit', '~> 3.2.0'
 end
 

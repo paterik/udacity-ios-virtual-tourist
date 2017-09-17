@@ -8,7 +8,6 @@
 
 import UIKit
 import MapKit
-import YNDropDownMenu
 
 class BaseController: UIViewController {
     
@@ -24,8 +23,6 @@ class BaseController: UIViewController {
     //
     // MARK: Base Variables
     //
-    
-    var appMenu: YNDropDownMenu?
     
     func _handleErrorAsSimpleDialog(_ errorTitle: String, _ errorMessage: String) {
     

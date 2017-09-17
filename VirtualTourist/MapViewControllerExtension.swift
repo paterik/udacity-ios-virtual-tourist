@@ -10,7 +10,6 @@ import Foundation
 import UIKit
 import MapKit
 import CoreStore
-import YNDropDownMenu
 
 extension MapViewController {
 
@@ -27,67 +26,6 @@ extension MapViewController {
         mapView.delegate = self
     }
     
-    /*
-     * handle delegate commands from other view (e.g. menu calls)
-     */
-    func handleDelegateCommand(
-        _ command: String) {
-        
-        if appDebugMode { print ("_received command: \(command)") }
-        
-        if command == "showSettingsForApp" {
-            appMenu!.hideMenu()
-        }
-        
-        if command == "showStatisticsForApp" {
-            appMenu!.hideMenu()
-        }
-    }
-    
-    func setupUIMenu() {
-    
-        let menuViews = Bundle.main.loadNibNamed("MapMainMenu", owner: nil, options: nil) as? [MapMainMenu]
-        
-        if let _menuViews = menuViews {
-            
-            let backgroundView = UIView()
-                backgroundView.backgroundColor = .black
-            
-            let _menuView = _menuViews[0] as MapMainMenu
-                _menuView.delegate = self
-            
-            appMenu = YNDropDownMenu(
-                frame: CGRect(x: 0, y: 28, width: UIScreen.main.bounds.size.width, height: 38),
-                dropDownViews: [_menuView],
-                dropDownViewTitles: [""] // no title(s) required
-            )
-            
-            appMenu!.setImageWhen(
-                normal:   UIImage(named: "icnMenu_v1"),
-                selected: UIImage(named: "icnMenuCancel_v1"),
-                disabled: UIImage(named: "icnMenu_v1")
-            )
-            
-            appMenu!.setLabelColorWhen(normal: .black, selected: UIColor(netHex: 0xFFA409), disabled: .gray)
-            appMenu!.setLabelFontWhen(normal: .systemFont(ofSize: 12), selected: .boldSystemFont(ofSize: 12), disabled: .systemFont(ofSize: 12))
-            appMenu!.backgroundBlurEnabled = true
-            appMenu!.bottomLine.isHidden = false
-            
-            appMenu!.blurEffectView = backgroundView
-            appMenu!.blurEffectViewAlpha = 0.7
-            appMenu!.alwaysSelected(at: 0)
-            
-            self.view.addSubview(appMenu!)
-            
-            appMenu!.snp.makeConstraints { (make) -> Void in
-                
-                make.bottom.equalTo(mapView.snp.top).offset( 203 )
-                make.height.equalTo( 128 )
-                make.width.equalTo( self.view )
-            }
-        }
-    }
-
     func loadMapRegion() {
         
         mapViewRegion = CoreStore.fetchOne(From<MapRegion>())
