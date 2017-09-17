@@ -12,7 +12,7 @@ import CoreStore
 import YNDropDownMenu
 import SnapKit
 
-class MapViewController: BaseController, MKMapViewDelegate {
+class MapViewController: BaseController, MKMapViewDelegate, ControllerCommandProtocol {
 
     //
     // MARK: IBOutlet Variables
@@ -64,6 +64,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
         super.viewDidLoad()
         
         setupUIMap()
+        setupUIMenu()
         
         loadMapRegion()
         loadMapAnnotations()
