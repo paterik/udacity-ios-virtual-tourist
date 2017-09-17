@@ -76,8 +76,6 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         photoCollectionView!.collectionViewLayout.invalidateLayout()
     }
     
-    
-    
     //
     // MARK: CollectionView Delegates
     //
@@ -173,7 +171,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
             removeCellIndexFromSelection(indexPath)
         };  setupUIReloadButton()
         
-        if appDebugMode == true {
+        if appDebugMode {
             print ("photo [\(cellObjectToUpdate._imageSourceURL!)] selected at position \(indexPath.row), status=\(dbgStatus)")
         }
         

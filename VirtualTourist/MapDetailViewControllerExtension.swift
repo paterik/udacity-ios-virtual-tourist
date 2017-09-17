@@ -208,17 +208,16 @@ extension MapDetailViewController {
                     // mode 1: normal loading of persisted photo stack
                     //
                     
-                    if notification == nil {
+                    if self.appDelegate.photoQueueDownloadIsActive == false && notification == nil {
                         
-                        // remove complete placeholder imageStack
-                        self.appDelegate.photoQueue.removeAll()
+                        self.appDelegate.photoQueue.removeAll() // remove old placeholder imageStack
                         for (index, photo) in self.appDelegate.photoDataObjects.enumerated() {
                             self.appDelegate.photoQueue.append(photo.convertToPhotoQueueObject(index))
                         }
                         
-                        //
-                        // mode 2: event based refresh loading of new persisted photo sack
-                        //
+                    //
+                    // mode 2: event based refresh loading of new persisted photo sack
+                    //
                         
                     } else {
                         
@@ -246,7 +245,6 @@ extension MapDetailViewController {
                         // check queue final state and cleanUp cache/placeholder fragments
                         if self.appDelegate.photoQueueImagesDownloaded == self.appDelegate.photoQueueImagesAvailable - 1 {
                             
-                            self.pin.isDownloading = false
                             self.toggleRefreshCollectionButton(true)
                             self.toggleCollectionViewInfoLabel(false)                        }
                     }
@@ -322,7 +320,7 @@ extension MapDetailViewController {
             updatedCell.activityIndicator.startAnimating()
             updatedCell.activityIndicator.isHidden = false
             
-            if appDebugMode == true {
+            if appDebugMode {
                 print ("=> delete index \(indexPath.row) from stack using metaHash \(cellObjectToUpdate._metaHash!)")
             }
             
@@ -345,7 +343,7 @@ extension MapDetailViewController {
         
         for (_, indexPath) in selectedIndexes.enumerated() {
             
-            if appDebugMode == true { print ("=> reset index \(indexPath.row) from stack") }
+            if appDebugMode { print ("=> reset index \(indexPath.row) from stack") }
             
             removeCellIndexFromSelection(indexPath)
             

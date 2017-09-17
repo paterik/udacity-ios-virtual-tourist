@@ -36,6 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var photoQueue: [PhotoQueueItem] = []
     var photoQueueImagesDownloaded: Int = 0
     var photoQueueImagesAvailable: Int = 0
+    var photoQueueDownloadIsActive: Bool = false
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         

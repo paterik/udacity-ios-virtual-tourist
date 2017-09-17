@@ -39,7 +39,7 @@ class FlickrClient: NSObject {
     // MARK: Variables
     //
     
-    var photo:Photo?
+    var photo: Photo?
     
     func setImageQueue(_ numberOfImages: Int, _ targetPin: Pin) {
     
@@ -155,8 +155,6 @@ class FlickrClient: NSObject {
                                     
                                     completionHandlerForFetchFlickrImages(false, "Oops! Download could not be handled: \(error!)")
                                     
-                                    self.appDelegate.photoQueue[imageLoopIndex] = queueItem
-                                    
                                 } else {
                                     
                                     // update queue media item (for success)
@@ -185,9 +183,10 @@ class FlickrClient: NSObject {
                                     queueItem._photo = _photo
                                     
                                     completionHandlerForFetchFlickrImages(true, nil)
-                                    
+                                }
+                                
+                                if imageLoopIndex <= self.appDelegate.photoQueue.count {
                                     self.appDelegate.photoQueue[imageLoopIndex] = queueItem
-                                    
                                 }
                             }
                         }

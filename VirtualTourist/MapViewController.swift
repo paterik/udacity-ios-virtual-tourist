@@ -37,8 +37,6 @@ class MapViewController: BaseController, MKMapViewDelegate {
     let mapPinPersistedImageName = "icnMapPin_v1"
     let mapPinNewAddedImageName = "icnMapPin_v2"
     let mapPinIncompleteImageName = "icnMapPin_v3"
-    let mapEditModeInfoLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
-    let mapLoadingBar = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 5))
     
     //
     // MARK: Class Variables
@@ -160,6 +158,9 @@ class MapViewController: BaseController, MKMapViewDelegate {
         
     func mapAddPin(_ gestureRecognizer: UIGestureRecognizer) {
         
+        // wait for last download completion before adding new pins
+        if appDelegate.photoQueueDownloadIsActive == true { return }
+        
         let locationInMap = gestureRecognizer.location(in: mapView)
         let coordinate:CLLocationCoordinate2D = mapView.convert(locationInMap, toCoordinateFrom: mapView)
         
@@ -182,7 +183,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
                         self.mapView.addAnnotation(self.mapViewPin!)
                         self._pinLastAdded = self.mapViewPin!
                         
-                        if self.appDebugMode == true { print ("--- mapMapPinObject created successfully ---") }
+                        if self.appDebugMode { print ("--- mapMapPinObject created successfully ---") }
                     
                     },  failure: { (error) in
                         
@@ -211,7 +212,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
                         }
                     }
                     
-                    if appDebugMode == true {
+                    if appDebugMode {
                         
                         let numOfPins = CoreStore.fetchAll(From<Pin>())?.count
                         print ("pin #\(numOfPins!) set successfully done at \(coordinate)")

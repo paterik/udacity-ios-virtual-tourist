@@ -18,7 +18,8 @@ class BaseController: UIViewController {
     
     let appDebugMode: Bool = true
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
-    let metaDateTimeFormat = "dd.MM.Y hh:mm"
+    let mapEditModeInfoLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
+    let mapLoadingBar = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 5))
     
     //
     // MARK: Base Variables

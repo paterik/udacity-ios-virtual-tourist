@@ -59,7 +59,7 @@ extension MapViewController {
             
                 self.mapViewRegion = CoreStore.fetchExisting(transactionRegion)!
                 self.mapViewRegionObjectId = self.mapViewRegion?.objectID // just to be sure ;)
-                if self.appDebugMode == true { print ("--- mapRegionObjID: \(self.mapViewRegionObjectId!) updated ---") }
+                if self.appDebugMode { print ("--- mapRegionObjID: \(self.mapViewRegionObjectId!) updated ---") }
             
             },  failure: { (error) in print (error) }
         )
@@ -97,23 +97,6 @@ extension MapViewController {
         _initProgressBar()
     }
     
-    func handleLastPhotoTransfered(_ notification: NSNotification?) {
-        
-        if _pinLastAdded == nil || notification == nil { return }
-        
-        if let userInfo = notification!.userInfo as? [String: Bool]
-        {
-            _pinLastAdded!.isDownloading = true
-            
-            if let completed = userInfo["completed"] {
-                if completed == true {
-                    
-                    _pinLastAdded!.isDownloading = !completed
-                }
-            }
-        }
-    }
-    
     func _initProgressBar() {
     
         mapLoadingBar.backgroundColor = UIColor(netHex: 0x262626)
@@ -130,6 +113,8 @@ extension MapViewController {
     
     func _deinitProgressBar() {
         
+        appDelegate.photoQueueDownloadIsActive = false
+        
         mapLoadingBar.isEnabled = false
         mapLoadingBar.isHidden = true
         
@@ -144,36 +129,39 @@ extension MapViewController {
     
         if let userInfo = notification!.userInfo as? [String: Int]
         {
-            if let _ = userInfo["indexCurrent"],
-               let indexMax = userInfo["indexMax"] {
+            if let indexMax = userInfo["indexMax"] {
                 
                 progressCounter += 1
-                progressCurrentPerc = Float(progressCounter * 100 / indexMax)
                 progressMaxWidth = Float(self.view.layer.frame.width)
-                progressCurrentWidth = progressMaxWidth / 100 * progressCurrentPerc
-                
-                self.mapLoadingBar.snp.remakeConstraints { (make) -> Void in
+                progressCurrentPerc = Float(progressCounter * 100 / indexMax)
+                if progressCurrentPerc > 0 {
                     
-                    make.height.equalTo( 10 )
-                    make.width.equalTo( progressCurrentWidth )
-                    make.bottom.equalTo(mapView.snp.top).offset( 10 )
+                    appDelegate.photoQueueDownloadIsActive = true
                     
-                    if progressCurrentPerc == 100 {
+                    progressCurrentWidth = progressMaxWidth / 100 * progressCurrentPerc
+                    self.mapLoadingBar.snp.remakeConstraints { (make) -> Void in
                         
-                        self.mapLoadingBar.backgroundColor = UIColor(netHex: 0x1ABC9C)
+                        make.height.equalTo( 10 )
+                        make.width.equalTo( progressCurrentWidth )
+                        make.bottom.equalTo(mapView.snp.top).offset( 10 )
                         
-                        let _ = Timer.scheduledTimer(
-                            timeInterval: 0.675,
-                            target: self,
-                            selector:  #selector(MapViewController._deinitProgressBar),
-                            userInfo: nil,
-                            repeats: false
-                        )
+                        if progressCurrentPerc == 100 {
+                            
+                            self.mapLoadingBar.backgroundColor = UIColor(netHex: 0x1ABC9C)
+                            
+                            let _ = Timer.scheduledTimer(
+                                timeInterval: 0.675,
+                                target: self,
+                                selector:  #selector(MapViewController._deinitProgressBar),
+                                userInfo: nil,
+                                repeats: false
+                            )
+                        }
                     }
-                }
-                
-                if appDebugMode {
-                    print ("===> \(progressCounter)/\(indexMax) <=== \(self.view.layer.frame.width) : \(progressCurrentPerc)")
+                    
+                    if appDebugMode {
+                        print ("===> \(progressCounter)/\(indexMax) <=== \(self.view.layer.frame.width) : \(progressCurrentPerc)")
+                    }
                 }
             }
         }
@@ -197,7 +185,7 @@ extension MapViewController {
             success: { _ in
                 self.mapView.removeAnnotation(targetPin)
                 self._pinSelected = nil
-                if self.appDebugMode == true {
+                if self.appDebugMode {
                     print ("[_DEV_] \(targetPin.coordinate) deleted from persistance layer!")
                 }
                 
@@ -210,7 +198,7 @@ extension MapViewController {
 
         // check that corresponding photos deleted also
         if let photos = CoreStore.fetchAll(From<Photo>()) {
-            if self.appDebugMode == true {
+            if self.appDebugMode {
                 print ("===============================")
                 print ("\(photos.count) still available")
             }
@@ -228,7 +216,7 @@ extension MapViewController {
             completion: { _ in
                 
                 self.mapView.removeAnnotations(self.mapView.annotations)
-                if self.appDebugMode == true {
+                if self.appDebugMode {
                     print ("[_DEV_] all \(numOfCurrentPins!) previously saved pins deleted from persitance layer")
                 }
             }
