@@ -4,7 +4,6 @@ platform :ios, '10.0'
 use_frameworks!
 
 def uiLibs
-    pod 'BGTableViewRowActionWithImage'
     pod 'SnapKit', '~> 3.2.0'
 end
 

@@ -82,20 +82,17 @@ class MapViewController: BaseController, MKMapViewDelegate {
     }
     
     //
-    // MARK: IBAction Methods
+    // MARK: Segue/Navigation
     //
     
-    @IBAction func toggleEditMode(_ sender: AnyObject) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
-        btnEditModeItem.image = UIImage(named: "icnLock_v1")
-        if !mapEditMode {
-            btnEditModeItem.image = UIImage(named: "icnUnlock_v1")
+        if segue.identifier == mapPinDetailIdentifier {
+            
+            mapView.deselectAnnotation(_pinSelected, animated: false)
+            let controller = segue.destination as! MapDetailViewController
+            controller.pin = _pinSelected
         }
-        
-        mapEditModeInfoLabel.isEnabled = !mapEditMode
-        mapEditModeInfoLabel.isHidden = mapEditMode
-        
-        mapEditMode = !mapEditMode
     }
     
     //
@@ -238,17 +235,20 @@ class MapViewController: BaseController, MKMapViewDelegate {
     }
     
     //
-    // MARK: Segue/Navigation
+    // MARK: IBAction Methods
     //
     
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    @IBAction func toggleEditMode(_ sender: AnyObject) {
         
-        if segue.identifier == mapPinDetailIdentifier {
-            
-            mapView.deselectAnnotation(_pinSelected, animated: false)
-            let controller = segue.destination as! MapDetailViewController
-                controller.pin = _pinSelected
+        btnEditModeItem.image = UIImage(named: "icnLock_v1")
+        if !mapEditMode {
+            btnEditModeItem.image = UIImage(named: "icnUnlock_v1")
         }
+        
+        mapEditModeInfoLabel.isEnabled = !mapEditMode
+        mapEditModeInfoLabel.isHidden = mapEditMode
+        
+        mapEditMode = !mapEditMode
     }
 }
 

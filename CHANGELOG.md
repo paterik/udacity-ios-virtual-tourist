@@ -4,8 +4,15 @@ All notable changes of VirtualTourist release series are documented in this file
 
 _This VirtualTourist project changelog documentation start with version 0.9.9 (2017-04-13)_
 
-## [0.9.9], 2017-04-13:
+## [1.0.0], 2017-09-17:
 _current_
+
+### Added
+
+* final code for app review
+
+
+## [0.9.9], 2017-04-13:
 
 ### Added
 

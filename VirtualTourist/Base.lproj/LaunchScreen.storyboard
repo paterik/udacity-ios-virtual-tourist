@@ -26,8 +26,8 @@
                                 <rect key="frame" x="0.0" y="20" width="375" height="639"/>
                                 <color key="backgroundColor" red="0.92156862750000001" green="0.92156862750000001" blue="0.92549019610000005" alpha="1" colorSpace="calibratedRGB"/>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0.9.9" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HNE-R3-HeD" userLabel="ui_lbl_versionString">
-                                <rect key="frame" x="16" y="20" width="343" height="17"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="v1.0.0" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HNE-R3-HeD" userLabel="ui_lbl_versionString">
+                                <rect key="frame" x="16" y="630" width="343" height="17"/>
                                 <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="14"/>
                                 <color key="textColor" red="0.20000000000000001" green="0.21960784310000001" blue="0.23529411759999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
@@ -35,13 +35,13 @@
                         </subviews>
                         <color key="backgroundColor" red="0.93714088201522827" green="0.93724042177200317" blue="0.94122511148452759" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="YIs-wz-92H" firstAttribute="centerX" secondItem="HNE-R3-HeD" secondAttribute="centerX" id="8pW-CJ-z6R"/>
-                            <constraint firstItem="HNE-R3-HeD" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leadingMargin" id="WYX-nt-yrB"/>
-                            <constraint firstItem="YIs-wz-92H" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="bAl-Ha-hp6"/>
-                            <constraint firstAttribute="trailing" secondItem="YIs-wz-92H" secondAttribute="trailing" id="kNi-wd-ADz"/>
-                            <constraint firstItem="xb3-aO-Qok" firstAttribute="top" secondItem="YIs-wz-92H" secondAttribute="bottom" constant="8" symbolic="YES" id="nE5-NW-QZy"/>
-                            <constraint firstItem="YIs-wz-92H" firstAttribute="top" secondItem="HNE-R3-HeD" secondAttribute="top" id="pTH-T5-Rrb"/>
-                            <constraint firstItem="YIs-wz-92H" firstAttribute="top" secondItem="Llm-lL-Icb" secondAttribute="bottom" id="sGW-J1-gCZ"/>
+                            <constraint firstItem="YIs-wz-92H" firstAttribute="centerX" secondItem="HNE-R3-HeD" secondAttribute="centerX" id="BHy-C8-JS3"/>
+                            <constraint firstItem="HNE-R3-HeD" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leadingMargin" id="O1U-o4-2pk"/>
+                            <constraint firstItem="YIs-wz-92H" firstAttribute="top" secondItem="Llm-lL-Icb" secondAttribute="bottom" id="RvG-Iw-tR1"/>
+                            <constraint firstItem="YIs-wz-92H" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="ZLN-Mf-f9y"/>
+                            <constraint firstAttribute="trailing" secondItem="YIs-wz-92H" secondAttribute="trailing" id="abK-Yz-tfg"/>
+                            <constraint firstItem="xb3-aO-Qok" firstAttribute="top" secondItem="YIs-wz-92H" secondAttribute="bottom" constant="8" symbolic="YES" id="cFI-gq-Ybb"/>
+                            <constraint firstAttribute="bottom" secondItem="HNE-R3-HeD" secondAttribute="bottom" constant="20" symbolic="YES" id="n3j-zH-Lrk"/>
                         </constraints>
                     </view>
                 </viewController>

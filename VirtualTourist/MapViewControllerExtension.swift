@@ -14,7 +14,7 @@ import CoreStore
 extension MapViewController {
 
     //
-    // MARK: MapView Helper Methods
+    // MARK: UI Setup Helper Methods
     //
     
     func setupUIMap() {
@@ -25,6 +25,10 @@ extension MapViewController {
         mapView.addGestureRecognizer(longPress)
         mapView.delegate = self
     }
+    
+    //
+    // MARK: MapView Helper Methods
+    //
     
     func loadMapRegion() {
         
@@ -100,6 +104,10 @@ extension MapViewController {
         
         _initProgressBar()
     }
+    
+    //
+    // MARK: General Helper Methods
+    //
     
     func _initProgressBar() {
     
