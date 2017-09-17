@@ -51,7 +51,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
     //
     // MARK: UIViewController Overrides
     //
-    
+
     override func viewDidLoad() {
         
         super.viewDidLoad()
@@ -75,6 +75,8 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         
         photoCollectionView!.collectionViewLayout.invalidateLayout()
     }
+    
+    
     
     //
     // MARK: CollectionView Delegates
@@ -140,7 +142,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         
         collectionCellWidth = (view.frame.width / numberOfCellInRow) - collectionCellPadding
         collectionCellHeight = collectionCellWidth
-        
+                
         flowLayout.itemSize = CGSize(width: collectionCellWidth, height: collectionCellHeight)
         flowLayout.minimumInteritemSpacing = collectionCellSpacing
         flowLayout.minimumLineSpacing = collectionCellSpacing

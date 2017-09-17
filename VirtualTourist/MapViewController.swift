@@ -38,18 +38,24 @@ class MapViewController: BaseController, MKMapViewDelegate {
     let mapPinNewAddedImageName = "icnMapPin_v2"
     let mapPinIncompleteImageName = "icnMapPin_v3"
     let mapEditModeInfoLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
+    let mapLoadingBar = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 5))
     
     //
     // MARK: Class Variables
     //
     
-    var _pinSelected:Pin!
-    var _pinLastAdded:Pin? = nil
-    var mapViewPin:Pin?
-    var mapViewPins:[Pin]?
-    var mapViewRegion:MapRegion?
-    var mapViewRegionObjectId:NSManagedObjectID? = nil
-    var mapEditMode:Bool = false
+    var _pinSelected: Pin!
+    var _pinLastAdded: Pin? = nil
+    var mapViewPin: Pin?
+    var mapViewPins: [Pin]?
+    var mapViewRegion: MapRegion?
+    var mapViewRegionObjectId: NSManagedObjectID? = nil
+    var mapEditMode: Bool = false
+    
+    var progressCounter: Int = 0
+    var progressCurrentPerc: Float = 0.0
+    var progressMaxWidth: Float = 0.0
+    var progressCurrentWidth: Float = 0.0
     
     //
     // MARK: UIViewController Overrides
@@ -66,7 +72,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
         loadMapAdditions()
         
         NotificationCenter.default.addObserver(self,
-            selector: #selector(MapViewController.handleLastPhotoTransfered),
+            selector: #selector(MapViewController.handleProgressBar(_:)),
             name: NSNotification.Name(rawValue: appDelegate.pinPhotoDownloadedNotification),
             object: nil
         )

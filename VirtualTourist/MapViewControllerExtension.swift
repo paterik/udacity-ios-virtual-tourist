@@ -84,10 +84,17 @@ extension MapViewController {
         view.addSubview(mapEditModeInfoLabel)
         
         mapEditModeInfoLabel.snp.makeConstraints { (make) -> Void in
-            make.height.equalTo(50)
+            make.height.equalTo( 50 )
             make.width.equalTo(self.view)
             make.bottom.equalTo(bottomLayoutGuide.snp.top)
         }
+    
+        mapLoadingBar.isEnabled = true
+        mapLoadingBar.isHidden = false
+        
+        view.addSubview(mapLoadingBar)
+        
+        _initProgressBar()
     }
     
     func handleLastPhotoTransfered(_ notification: NSNotification?) {
@@ -102,6 +109,71 @@ extension MapViewController {
                 if completed == true {
                     
                     _pinLastAdded!.isDownloading = !completed
+                }
+            }
+        }
+    }
+    
+    func _initProgressBar() {
+    
+        mapLoadingBar.backgroundColor = UIColor(netHex: 0x262626)
+        mapLoadingBar.isEnabled = true
+        mapLoadingBar.isHidden = false
+        
+        self.mapLoadingBar.snp.remakeConstraints { (make) -> Void in
+            
+            make.bottom.equalTo(mapView.snp.top).offset( 10 )
+            make.height.equalTo( 5 )
+            make.width.equalTo( 0 )
+        }
+    }
+    
+    func _deinitProgressBar() {
+        
+        mapLoadingBar.isEnabled = false
+        mapLoadingBar.isHidden = true
+        
+        progressCounter = 0
+        progressCurrentPerc = 0
+        progressCurrentWidth = 0
+        
+        _initProgressBar()
+    }
+    
+    func handleProgressBar(_ notification: NSNotification?) {
+    
+        if let userInfo = notification!.userInfo as? [String: Int]
+        {
+            if let _ = userInfo["indexCurrent"],
+               let indexMax = userInfo["indexMax"] {
+                
+                progressCounter += 1
+                progressCurrentPerc = Float(progressCounter * 100 / indexMax)
+                progressMaxWidth = Float(self.view.layer.frame.width)
+                progressCurrentWidth = progressMaxWidth / 100 * progressCurrentPerc
+                
+                self.mapLoadingBar.snp.remakeConstraints { (make) -> Void in
+                    
+                    make.height.equalTo( 10 )
+                    make.width.equalTo( progressCurrentWidth )
+                    make.bottom.equalTo(mapView.snp.top).offset( 10 )
+                    
+                    if progressCurrentPerc == 100 {
+                        
+                        self.mapLoadingBar.backgroundColor = UIColor(netHex: 0x1ABC9C)
+                        
+                        let _ = Timer.scheduledTimer(
+                            timeInterval: 0.675,
+                            target: self,
+                            selector:  #selector(MapViewController._deinitProgressBar),
+                            userInfo: nil,
+                            repeats: false
+                        )
+                    }
+                }
+                
+                if appDebugMode {
+                    print ("===> \(progressCounter)/\(indexMax) <=== \(self.view.layer.frame.width) : \(progressCurrentPerc)")
                 }
             }
         }
