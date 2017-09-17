@@ -10,6 +10,8 @@ _current_
 ### Added
 
 * final code for app review
+* final documentation
+* final changelog/copyright
 
 
 ## [0.9.9], 2017-04-13:
