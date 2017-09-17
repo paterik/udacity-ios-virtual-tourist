@@ -104,7 +104,6 @@
 			isa = PBXGroup;
 			children = (
 				B12BC9FD1F4C7DD10037A359 /* clients */,
-				B12BCA001F4C7E070037A359 /* device */,
 				B12BCA011F4C7E380037A359 /* common */,
 				B12BCA081F4C80CA0037A359 /* data */,
 			);
@@ -183,13 +182,6 @@
 				B1FB54F21F678C6000E20E72 /* FlickrClientConstants.swift */,
 			);
 			name = flickr.com;
-			sourceTree = "<group>";
-		};
-		B12BCA001F4C7E070037A359 /* device */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = device;
 			sourceTree = "<group>";
 		};
 		B12BCA011F4C7E380037A359 /* common */ = {
