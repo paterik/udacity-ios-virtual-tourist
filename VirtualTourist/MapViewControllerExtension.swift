@@ -122,14 +122,14 @@ extension MapViewController {
         mapLoadingBar.isEnabled = false
         mapLoadingBar.isHidden = true
         
-        progressCounter = 0
-        progressCurrentPerc = 0
         progressCurrentWidth = 0
+        progressCurrentPerc = 0
+        progressCounter = 0
         
         _initProgressBar()
     }
     
-    func handleProgressBar(_ notification: NSNotification?) {
+    func _handleProgressBar(_ notification: NSNotification?) {
     
         if let userInfo = notification!.userInfo as? [String: Int]
         {
@@ -152,6 +152,9 @@ extension MapViewController {
                         if progressCurrentPerc == 100 {
                             
                             self.mapLoadingBar.backgroundColor = UIColor(netHex: 0x1ABC9C)
+                            
+                            // (re)enable controls after download is finilized
+                            self.toggleMapControls(true)
                             
                             let _ = Timer.scheduledTimer(
                                 timeInterval: 0.675,

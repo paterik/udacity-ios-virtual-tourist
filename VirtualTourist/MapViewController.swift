@@ -31,12 +31,11 @@ class MapViewController: BaseController, MKMapViewDelegate {
     // MARK: Class Basic Constants
     //
     
-    let mapLongPressDuration = 0.875
     let mapPinIdentifier = "Pin"
     let mapPinDetailIdentifier = "locationDetail"
     let mapPinPersistedImageName = "icnMapPin_v1"
-    let mapPinNewAddedImageName = "icnMapPin_v2"
     let mapPinIncompleteImageName = "icnMapPin_v3"
+    let mapLongPressDuration = 0.875
     
     //
     // MARK: Class Variables
@@ -69,7 +68,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
         loadMapAdditions()
         
         NotificationCenter.default.addObserver(self,
-            selector: #selector(MapViewController.handleProgressBar(_:)),
+            selector: #selector(MapViewController._handleProgressBar(_:)),
             name: NSNotification.Name(rawValue: appDelegate.pinPhotoDownloadedNotification),
             object: nil
         )
@@ -126,7 +125,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
         } else {
                 
             annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: mapPinIdentifier)
-            annotationView.image = UIImage(named: mapPinNewAddedImageName)
+            annotationView.image = UIImage(named: mapPinPersistedImageName)
             annotationView.canShowCallout = false
             annotationView.isDraggable = false
             
@@ -161,11 +160,20 @@ class MapViewController: BaseController, MKMapViewDelegate {
             present(alert, animated: true, completion: nil)
         }
     }
+    
+    func toggleMapControls(_ enabled: Bool) {
         
+        btnAppMenu.isEnabled = enabled
+        btnEditModeItem.isEnabled = enabled
+    }
+    
     func mapAddPin(_ gestureRecognizer: UIGestureRecognizer) {
         
         // wait for last download completion before adding new pins
         if appDelegate.photoQueueDownloadIsActive == true { return }
+        
+        // disable statistic-/pinLock button while downloading
+        toggleMapControls(false)
         
         let locationInMap = gestureRecognizer.location(in: mapView)
         let coordinate:CLLocationCoordinate2D = mapView.convert(locationInMap, toCoordinateFrom: mapView)

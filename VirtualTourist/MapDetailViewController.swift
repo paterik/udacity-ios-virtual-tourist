@@ -40,13 +40,12 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
     let cellPhotoImagePlaceholder = "imgPhotoPlaceholder_v1"
     let cellPhotoImageAlphaForSelected: CGFloat = 0.475
     
-    var selectedIndexes = [IndexPath]()
-    
     //
     // MARK: Class Variables
     //
     
     var pin: Pin!
+    var selectedIndexes = [IndexPath]()
     
     //
     // MARK: UIViewController Overrides
@@ -63,7 +62,7 @@ class MapDetailViewController: BaseController, MKMapViewDelegate, UICollectionVi
         loadPhotosForCollectionView(nil)
         
         NotificationCenter.default.addObserver(self,
-            selector: #selector(MapDetailViewController.loadPhotosForCollectionView),
+            selector: #selector(MapDetailViewController.loadPhotosForCollectionView(_:)),
             name: NSNotification.Name(rawValue: appDelegate.pinPhotoDownloadedNotification),
             object: nil
         )
