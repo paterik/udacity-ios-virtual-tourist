@@ -29,6 +29,7 @@
 		B1AF26F51F5AC86B006B94CC /* Dictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1AF26F41F5AC86B006B94CC /* Dictionary.swift */; };
 		B1AF26F71F5F016C006B94CC /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1AF26F61F5F016C006B94CC /* UIImage.swift */; };
 		B1D4AC271F6E493D009E5718 /* ControllerCommandProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1D4AC261F6E493D009E5718 /* ControllerCommandProtocol.swift */; };
+		B1EBD4961F6E5D2A00822D8F /* StatisticViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1EBD4951F6E5D2A00822D8F /* StatisticViewController.swift */; };
 		B1F8D19F1F4F2DB20025D575 /* Pin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1F8D19E1F4F2DB20025D575 /* Pin.swift */; };
 		B1FB54EF1F6536F400E20E72 /* FlickrCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FB54EE1F6536F400E20E72 /* FlickrCell.swift */; };
 		B1FB54F11F6548CC00E20E72 /* MapDetailViewControllerExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FB54F01F6548CC00E20E72 /* MapDetailViewControllerExtension.swift */; };
@@ -63,6 +64,7 @@
 		B1AF26F41F5AC86B006B94CC /* Dictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dictionary.swift; sourceTree = "<group>"; };
 		B1AF26F61F5F016C006B94CC /* UIImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
 		B1D4AC261F6E493D009E5718 /* ControllerCommandProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ControllerCommandProtocol.swift; sourceTree = "<group>"; };
+		B1EBD4951F6E5D2A00822D8F /* StatisticViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatisticViewController.swift; sourceTree = "<group>"; };
 		B1F8D19E1F4F2DB20025D575 /* Pin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pin.swift; sourceTree = "<group>"; };
 		B1FB54EE1F6536F400E20E72 /* FlickrCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlickrCell.swift; sourceTree = "<group>"; };
 		B1FB54F01F6548CC00E20E72 /* MapDetailViewControllerExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapDetailViewControllerExtension.swift; sourceTree = "<group>"; };
@@ -124,6 +126,7 @@
 				B12BCA031F4C7E630037A359 /* base */,
 				B12BCA051F4C7E720037A359 /* locationMapView */,
 				B12BCA061F4C7E960037A359 /* photoAlbumView */,
+				B1EBD4941F6E5CEF00822D8F /* statisticsView */,
 			);
 			name = controller;
 			sourceTree = "<group>";
@@ -310,6 +313,14 @@
 			name = protocol;
 			sourceTree = "<group>";
 		};
+		B1EBD4941F6E5CEF00822D8F /* statisticsView */ = {
+			isa = PBXGroup;
+			children = (
+				B1EBD4951F6E5D2A00822D8F /* StatisticViewController.swift */,
+			);
+			name = statisticsView;
+			sourceTree = "<group>";
+		};
 		B1F8D1671F4F2AA70025D575 /* extension */ = {
 			isa = PBXGroup;
 			children = (
@@ -488,6 +499,7 @@
 				B1AF26F31F5AC83C006B94CC /* String.swift in Sources */,
 				B11C2F091F544BE900F69F6E /* UIColor.swift in Sources */,
 				B1D4AC271F6E493D009E5718 /* ControllerCommandProtocol.swift in Sources */,
+				B1EBD4961F6E5D2A00822D8F /* StatisticViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

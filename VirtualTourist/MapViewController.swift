@@ -19,6 +19,7 @@ class MapViewController: BaseController, MKMapViewDelegate {
     
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var btnEditModeItem: UIBarButtonItem!
+    @IBOutlet weak var btnAppMenu: UIBarButtonItem!
     
     //
     // MARK: Class Special Constants
