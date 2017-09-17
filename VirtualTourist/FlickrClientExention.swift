@@ -35,7 +35,7 @@ extension FlickrClient {
                 newNumOfPages = transactionPin.metaNumOfPages as! UInt32
                 completionHandlerForUpdatedPin(CoreStore.fetchExisting(transactionPin)!, true, nil)
                 
-                if self.debugMode == true {
+                if self.debugMode {
                     print ("\n-> pin object successfully updated ---")
                     print ("   metaNumOfPages(old)=\(oldNumOfPages)), metaNumOfPages(new)=\(newNumOfPages)\n")
                 }
@@ -43,7 +43,7 @@ extension FlickrClient {
             
             failure: { (error) in
                 completionHandlerForUpdatedPin(nil, false, error.localizedDescription)
-                if self.debugMode == true { print ("--- <failure> pin object processing/persistence failed: \(error) ---") }
+                if self.debugMode { print ("--- <failure> pin object processing/persistence failed: \(error) ---") }
                 
                 return
             }
@@ -133,7 +133,7 @@ extension FlickrClient {
             
             if (error != nil) {
                 completionHandlerForPhotoProcessor(nil, nil, nil, false, error)
-                if self.debugMode == true { print ("--- <failure> photo object download failed: \(String(describing: error?.description)) ---") }
+                if self.debugMode { print ("--- <failure> photo object download failed: \(String(describing: error?.description)) ---") }
                 
                 return
                 
@@ -179,13 +179,13 @@ extension FlickrClient {
                         } else {
                         
                             completionHandlerForPhotoProcessor(nil, nil, nil, false, "Oops! Unable to persist location image!")
-                            if self.debugMode == true { print ("--- <error> photo object processing/persistence not successfuly ---") }
+                            if self.debugMode { print ("--- <error> photo object processing/persistence not successfuly ---") }
                         }
                         
                     },  failure: { (error) in
                     
                         completionHandlerForPhotoProcessor(nil, nil, nil, false, "Oops! Failure during persisting location image: \(error)!")
-                        if self.debugMode == true { print ("--- <failure> photo object processing/persistence failed: \(error) ---") }
+                        if self.debugMode { print ("--- <failure> photo object processing/persistence failed: \(error) ---") }
                     }
                 )
             }

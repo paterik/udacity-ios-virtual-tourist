@@ -104,9 +104,7 @@ class RequestClient {
             let parameterString = jsonDataParams!.stringFromHttpParameters()
             let requestURL = URL(string:"\(url)?\(parameterString)")!
             
-            if (debugMode) {
-                print (requestURL)
-            }
+            if (debugMode) { print (requestURL) }
             
             request = URLRequest(url: requestURL) as! NSMutableURLRequest
         }
