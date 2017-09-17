@@ -67,7 +67,7 @@ swift, swift-3, udacity, extension, uikit, foundation, app
 
 ## Releases
 
-VirtualTourist is currently available in [1 release](https://github.com/paterik/udacity-ios-virtual-tourist/releases) and will be following the sequence-based semantic version pattern _major.minor[.maintenance[.build]]_.
+VirtualTourist is currently available in [2 releases](https://github.com/paterik/udacity-ios-virtual-tourist/releases) and will be following the sequence-based semantic version pattern _major.minor[.maintenance[.build]]_.
 
 ## Changelog
 
