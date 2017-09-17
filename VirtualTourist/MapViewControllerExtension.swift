@@ -68,7 +68,11 @@ extension MapViewController {
     func loadMapAnnotations() {
         
         if let mapViewPins = _getAllPins() {
-            mapView.addAnnotations(mapViewPins)
+            if mapViewPins.count > 0 {
+                mapView.addAnnotations(mapViewPins)
+            }   else {
+                mapView.removeAnnotations(mapView.annotations)
+            }
         }
     }
     
@@ -158,10 +162,6 @@ extension MapViewController {
                             )
                         }
                     }
-                    
-                    if appDebugMode {
-                        print ("===> \(progressCounter)/\(indexMax) <=== \(self.view.layer.frame.width) : \(progressCurrentPerc)")
-                    }
                 }
             }
         }
@@ -195,14 +195,6 @@ extension MapViewController {
                 return
             }
         )
-
-        // check that corresponding photos deleted also
-        if let photos = CoreStore.fetchAll(From<Photo>()) {
-            if self.appDebugMode {
-                print ("===============================")
-                print ("\(photos.count) still available")
-            }
-        }
     }
     
     func _deleteAllPins() {

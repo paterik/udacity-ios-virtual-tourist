@@ -66,7 +66,6 @@ class MapViewController: BaseController, MKMapViewDelegate {
         setupUIMap()
         
         loadMapRegion()
-        loadMapAnnotations()
         loadMapAdditions()
         
         NotificationCenter.default.addObserver(self,
@@ -74,6 +73,13 @@ class MapViewController: BaseController, MKMapViewDelegate {
             name: NSNotification.Name(rawValue: appDelegate.pinPhotoDownloadedNotification),
             object: nil
         )
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        
+        super.viewDidAppear( animated )
+
+        loadMapAnnotations()
     }
     
     //
