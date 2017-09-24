@@ -6,10 +6,7 @@
 //  Copyright © 2017 Patrick Paechnatz. All rights reserved.
 //
 
-import UIKit
-import CoreData
 import CoreStore
-import MapKit
 
 class Photo: NSManagedObject {
     
